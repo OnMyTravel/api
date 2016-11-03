@@ -1,0 +1,22 @@
+{
+  "name": "Api",
+  "version": "0.0.0",
+  "description": "On My Travel API",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OnMyTravel/api.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/OnMyTravel/api/issues"
+  },
+  "homepage": "https://github.com/OnMyTravel/api#readme",
+  "dependencies": {
+    "express": "^4.14.0"
+  }
+}
