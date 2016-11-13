@@ -4,7 +4,7 @@
   "description": "On My Travel API",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha --recursive --watch"
+    "test": "NODE_ENV=test ./node_modules/mocha/bin/mocha --recursive --watch"
   },
   "repository": {
     "type": "git",
@@ -18,12 +18,15 @@
   "homepage": "https://github.com/OnMyTravel/api#readme",
   "dependencies": {
     "express": "^4.14.0",
-    "http-status-codes": "^1.0.6"
+    "http-status-codes": "^1.0.6",
+    "mongoose": "^4.6.7"
   },
   "devDependencies": {
     "chai": "^3.5.0",
     "mocha": "^3.1.2",
     "node-mocks-http": "^1.5.4",
+    "proxyquire": "^1.7.10",
+    "sinon-chai": "^2.8.0",
     "supertest": "^2.0.1"
   }
 }

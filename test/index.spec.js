@@ -1,21 +1,35 @@
-/* global describe, it */
-var index = require('../app/index')
-var request = require('supertest')
-var expect = require('chai').expect
+/* global describe, it, after */
+var proxyquire = require('proxyquire').noPreserveCache()
+var sinon = require('sinon')
+var chai = require('chai')
+chai.use(require('sinon-chai'))
+var expect = chai.expect
 
-describe('API', function () {
-  it('should have api informations on root', function (done) {
-    request(index)
-      .get('/')
-      .expect('Content-Type', /json/)
-      .end(function (err, res) {
-        if (err) {
-          done(err)
-        }
+var mocks = {
+  'mongoose': {
+    'connect': sinon.spy()
+  },
+  './app': {
+    'listen': sinon.stub()
+  },
+  './config': {
+    db: 'mongodb://localhost/test',
+    app: {
+      port: 1234
+    }
+  }
+}
 
-        expect(res.body).to.have.property('description')
-        expect(res.body).to.have.property('version')
-        done()
-      })
+// We load the module and mock some dependencies
+proxyquire('../index', mocks);
+
+describe('Application starter', function () {
+  it('should connect to mongodb using configuration details', function () {
+    // Then
+    expect(mocks.mongoose.connect).to.have.been.calledWith('mongodb://localhost/test')
+  })
+
+  it('should set the application listening on the configuration port', function () {
+    expect(mocks['./app'].listen).to.have.been.calledWith(1234)
   })
 })
