@@ -4,7 +4,8 @@
   "description": "On My Travel API",
   "main": "index.js",
   "scripts": {
-    "test": "NODE_ENV=test ./node_modules/mocha/bin/mocha --recursive --watch"
+    "test": "NODE_ENV=test ./node_modules/mocha/bin/mocha --recursive --watch",
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
