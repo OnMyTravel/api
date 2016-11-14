@@ -1,3 +1,3 @@
 module.exports = {
-  db: 'mongodb://localhost/development'
+  db: 'mongodb://localhost/onmytravel-dev'
 }
