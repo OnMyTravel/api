@@ -1,0 +1,8 @@
+{
+  "app": {
+    "port": 3000
+  },
+  "database": {
+      "host": "mongodb://localhost/onmytravel-dev"
+  }
+}

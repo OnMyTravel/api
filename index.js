@@ -1,12 +1,15 @@
-var mongoose = require('mongoose')
+let mongoose = require('mongoose')
+let config = require('config')
 
-var pjson = require('./package.json')
-var api = require('./app')
+let pjson = require('./package.json')
+let api = require('./app')
 
-var config = require('./config')
-
-mongoose.connect(config.db)
+mongoose.connect(config.database.host)
+let db = mongoose.connection
+db.on('error', console.error.bind(console, 'Database error:'))
 
 api.listen(config.app.port, function () {
   console.log(pjson.name + ': running on port ' + config.app.port)
 })
+
+module.exports = api
