@@ -1,4 +1,4 @@
-/* global describe, it, after */
+/* global describe, it */
 var proxyquire = require('proxyquire').noPreserveCache()
 var sinon = require('sinon')
 var chai = require('chai')
@@ -19,11 +19,6 @@ var mocks = {
 proxyquire('../index', mocks)
 
 describe('Application starter', function () {
-  it('should connect to mongodb using configuration details', function () {
-    // Then
-    expect(mocks.mongoose.connect).to.have.been.calledWith('mongodb://localhost/onmytravel-dev')
-  })
-
   it('should set the application listening on the configuration port', function () {
     expect(mocks['./app'].listen).to.have.been.calledWith(3000)
   })
