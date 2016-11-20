@@ -2,22 +2,12 @@
 let app = require('../../index')
 let Trip = require('../../app/trips/model')
 
-let mongoose = require('mongoose')
-let mockgoose = require('mockgoose')
 let faker = require('faker')
 let chai = require('chai')
 let chaiHttp = require('chai-http')
 
 chai.should()
 chai.use(chaiHttp)
-
-before(function (done) {
-  mockgoose(mongoose).then(function () {
-    mongoose.connect('mongodb://127.0.0.1/TestingDB', function (err) {
-      done(err)
-    })
-  })
-})
 
 describe('Trips', function () {
   describe('controller', function () {
