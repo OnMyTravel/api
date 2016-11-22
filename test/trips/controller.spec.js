@@ -15,7 +15,7 @@ describe('Trips', function () {
       let trip
       before(function (done) {
         trip = new Trip({ name: faker.lorem.sentence() })
-        trip.save((err, newTrip) => {
+        trip.save((e, newTrip) => {
           trip = newTrip
           done()
         })
@@ -38,11 +38,62 @@ describe('Trips', function () {
       it('should return 401 Unauthorized when no token is provided', function (done) {
         chai.request(app)
           .get('/trips')
-          .end((err, res) => {
+          .end((e, res) => {
             res.should.have.status(401)
             res.headers.should.have.property('www-authenticate', 'bearer')
             done()
           })
+      })
+    })
+
+    describe(':create', () => {
+      describe('when not authenticated', () => {
+        it('should return Unauthorized', (done) => {
+          chai.request(app)
+            .post('/trips')
+            .end((e, res) => {
+              res.should.have.status(401)
+              done()
+            })
+        })
+
+        it('should add www-authenticate header', (done) => {
+          chai.request(app)
+            .post('/trips')
+            .end((e, res) => {
+              res.should.have.status(401)
+              res.headers.should.have.property('www-authenticate', 'bearer')
+              done()
+            })
+        })
+      })
+
+      describe('when the request payload is incorrect', () => {
+        it('should BAD REQUEST', (done) => {
+          chai.request(app)
+            .post('/trips')
+            .set('Authorization', 'Bearer cn389ncoiwuencr')
+            .send({})
+            .end((e, res) => {
+              res.should.have.status(400)
+              done()
+            })
+        })
+      })
+
+      describe('when the payload is OK', () => {
+        it('should return CREATED status', (done) => {
+          chai.request(app)
+            .post('/trips')
+            .set('Authorization', 'Bearer cn389ncoiwuencr')
+            .send({ name: 'Lorem ipsum' })
+            .end((e, res) => {
+              res.should.have.status(201)
+              res.body.should.have.property('name', 'Lorem ipsum')
+              res.body.should.have.property('_id')
+              done()
+            })
+        })
       })
     })
   })
