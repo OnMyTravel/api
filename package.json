@@ -7,6 +7,12 @@
     "test": "NODE_ENV=test ./node_modules/mocha/bin/mocha --recursive",
     "start": "node index.js"
   },
+  "standard": {
+    "globals": [
+      "describe",
+      "it"
+    ]
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/OnMyTravel/api.git"
