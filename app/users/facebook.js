@@ -14,7 +14,7 @@ function getUserDetails (token) {
       // }
     })
     var args = { headers: { 'Authorization': 'Bearer ' + token } }
-    client.get(facebook_api_base_url + '/' + facebook_api_version + '/me?fields=id%2Cname', args,
+    client.get(facebook_api_base_url + '/' + facebook_api_version + '/me?fields=id%2Cname%2Cemail', args,
       (data, response) => {
         if (Buffer.isBuffer(data)) {
           data = data.toString('utf8')
