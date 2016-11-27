@@ -11,7 +11,8 @@
     "globals": [
       "describe",
       "it",
-      "beforeEach"
+      "beforeEach",
+      "before"
     ]
   },
   "repository": {
