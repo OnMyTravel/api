@@ -10,7 +10,8 @@
   "standard": {
     "globals": [
       "describe",
-      "it"
+      "it",
+      "beforeEach"
     ]
   },
   "repository": {
@@ -31,7 +32,9 @@
     "express": "^4.14.0",
     "faker": "^3.1.0",
     "http-status-codes": "^1.0.6",
-    "mongoose": "^4.6.7"
+    "jsonwebtoken": "^7.1.9",
+    "mongoose": "^4.6.7",
+    "node-rest-client": "^2.0.1"
   },
   "devDependencies": {
     "chai": "^3.5.0",
