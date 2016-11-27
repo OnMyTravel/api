@@ -3,6 +3,7 @@ let app = require('../../index')
 let User = require('../../app/users/model')
 let facebookResponses = require('./facebook.errors')
 let httpStatus = require('http-status-codes')
+let config = require('config')
 let chai = require('chai')
 let chaiHttp = require('chai-http')
 
@@ -15,7 +16,7 @@ const ALLOWEDTOKEN = 'EAACEdEose0cBAKLLwLKSXjs2Xrgd4LdSermEQMhbhUo3qAl8hmj98hB0'
 const UNAUTHORIZEDTOKEN = 'EAACEdEose0cBAM8BlABqcgQlCIZCZAZAJgW60opqGtC3iIfg2gZBp6oC'
 
 describe('Users', () => {
-  describe('registerFromFacebook', () => {
+  describe('/users/register/facebook', () => {
     describe('when facebook token is wrong', () => {
       beforeEach(() => {
         mockHttpAnswser(facebookResponses.UNAUTHORIZED, UNAUTHORIZEDTOKEN)
@@ -54,14 +55,17 @@ describe('Users', () => {
     describe('when the account already exists', () => {
       let user
 
-      beforeEach(() => {
+      beforeEach((done) => {
+        User.remove({}).exec()
         user = new User({
           name: 'Adrien Saunier',
           email: 'contact.adriensaunier@gmail.com',
           id_facebook: '1168196352'
         })
 
-        user.save()
+        user.save(() => {
+          done()
+        })
         mockHttpAnswser(facebookResponses.OK, ALLOWEDTOKEN)
       })
 
@@ -73,22 +77,18 @@ describe('Users', () => {
             res.statusCode.should.equal(httpStatus.OK)
             res.body.should.have.property('token')
 
-            var decodedToken = jsonwebtoken.verify(res.body.token, 'supersecret')
-            decodedToken.should.have.property('id_facebook', '1168196352')
+            var decodedToken = jsonwebtoken.verify(res.body.token, config.get('app-secret'))
+            decodedToken.should.have.property('id', '' + user._id)
             decodedToken.should.have.property('facebook_access_token', ALLOWEDTOKEN)
-
             done()
           })
       })
     })
 
     describe('when the facebook ID is not registered', () => {
-      beforeEach((done) => {
+      beforeEach(() => {
         mockHttpAnswser(facebookResponses.OK, ALLOWEDTOKEN)
-        User.remove({ id_facebook: '1168196352' })
-          .then(() => {
-            done()
-          })
+        User.remove({ id_facebook: '1168196352' }).exec()
       })
 
       it('should return CREATED', (done) => {
@@ -99,8 +99,7 @@ describe('Users', () => {
             res.statusCode.should.equal(httpStatus.CREATED)
             res.body.should.have.property('token')
 
-            var decodedToken = jsonwebtoken.verify(res.body.token, 'supersecret')
-            decodedToken.should.have.property('id_facebook', '1168196352')
+            var decodedToken = jsonwebtoken.verify(res.body.token, config.get('app-secret'))
             decodedToken.should.have.property('facebook_access_token', ALLOWEDTOKEN)
 
             User.findOne({ id_facebook: '1168196352' })
