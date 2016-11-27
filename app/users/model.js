@@ -6,7 +6,6 @@ let UserSchema = new Schema(
     name: String,
     email: {
       type: String,
-      lowercase: true,
       required: true
     },
     id_facebook: {
