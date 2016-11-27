@@ -4,6 +4,15 @@ let facebookClient = require('./facebook')
 let User = require('./model')
 
 function registerFromFacebook (req, res) {
+  if (!req.body.access_token) {
+    return res.status(httpStatus.BAD_REQUEST).json({
+      'error': {
+        'name': 'MissingParameter',
+        'message': 'access_token must be provided'
+      }
+    })
+  }
+
   return facebookClient
     .getUserDetails(req.body.access_token)
     .then((data, response) => {
@@ -28,7 +37,7 @@ function registerFromFacebook (req, res) {
           }
         })
     }, (error) => {
-      res.status(401).json(error)
+      res.status(httpStatus.UNAUTHORIZED).json(error)
     })
 }
 

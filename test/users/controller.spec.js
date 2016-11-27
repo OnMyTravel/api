@@ -33,6 +33,24 @@ describe('Users', () => {
       })
     })
 
+    describe('when no access_token provided', function () {
+      it('should return a 400', (done) => {
+        chai.request(app)
+          .post('/users/register/facebook')
+          .send({})
+          .end((e, res) => {
+            res.body.should.be.deep.equal({
+              'error': {
+                'name': 'MissingParameter',
+                'message': 'access_token must be provided'
+              }
+            })
+            res.statusCode.should.equal(httpStatus.BAD_REQUEST)
+            done()
+          })
+      })
+    })
+
     describe('when the account already exists', () => {
       let user
 
@@ -101,6 +119,6 @@ describe('Users', () => {
 
 function mockHttpAnswser (answer, token) {
   nock('https://graph.facebook.com', {reqheaders: { 'authorization': 'Bearer ' + token }})
-    .get('/v2.8/me?fields=id%2Cname')
+    .get('/v2.8/me?fields=id%2Cname%2Cemail')
     .reply(answer.status, answer.body)
 }
