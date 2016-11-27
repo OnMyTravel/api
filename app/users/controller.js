@@ -40,4 +40,14 @@ function registerFromFacebook (req, res) {
     })
 }
 
-module.exports = { registerFromFacebook }
+function me (req, res) {
+  let token = shared.tokens.getToken(req)
+  let decodedToken = shared.tokens.decode(token)
+
+  User.findById(decodedToken.id)
+    .then((user) => {
+      res.status(httpStatus.OK).json(user.toJSON())
+    })
+}
+
+module.exports = { registerFromFacebook, me }
