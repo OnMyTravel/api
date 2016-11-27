@@ -4,7 +4,7 @@ const jsonwebtoken = require('jsonwebtoken')
 
 function isAuthenticated (request, response, next) {
   if (request.headers.authorization) {
-    let token = request.headers.authorization.substring('Bearer '.length)
+    let token = getToken(request)
     try {
       jsonwebtoken.verify(token, config.get('app-secret'))
       next()
@@ -21,4 +21,21 @@ function isAuthenticated (request, response, next) {
   }
 }
 
-module.exports = { isAuthenticated }
+function create (id, facebook_token) {
+  return jsonwebtoken.sign({
+    id: id,
+    facebook_access_token: facebook_token
+  }, config.get('app-secret'))
+}
+
+function getToken (request) {
+  return request.headers.authorization.substring('Bearer '.length)
+}
+
+function decode (token) {
+  let decodedToken = jsonwebtoken.decode(token, config.get('app-secret'))
+  delete decodedToken.iat
+  return decodedToken
+}
+
+module.exports = { isAuthenticated, tokens: { getToken, decode, create } }
