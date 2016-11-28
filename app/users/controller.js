@@ -34,7 +34,7 @@ function registerFromFacebook (req, res) {
           }
         })
     }, (error) => {
-      res.status(httpStatus.UNAUTHORIZED).json(error)
+      res.status(httpStatus.UNAUTHORIZED).json(JSON.parse(error))
     })
 }
 
