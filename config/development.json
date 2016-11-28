@@ -1,5 +1,6 @@
 {
   "database": {
       "host": "mongodb://localhost/onmytravel-dev"
-  }
+  },
+  "app-secret": "$7[<XC?>cCF5Q3y)"
 }
