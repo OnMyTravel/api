@@ -1,9 +1,7 @@
 const httpStatus = require('http-status-codes')
-const jsonwebtoken = require('jsonwebtoken')
 const facebookClient = require('./facebook')
 const User = require('./model')
 const shared = require('../shared')
-const config = require('config')
 
 function registerFromFacebook (req, res) {
   if (!req.body.access_token) {
