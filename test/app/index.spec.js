@@ -1,5 +1,5 @@
 /* global describe, it */
-var index = require('../../app/index')
+var index = require(require('config').get('app-folder') + '/index')
 var request = require('supertest')
 var expect = require('chai').expect
 

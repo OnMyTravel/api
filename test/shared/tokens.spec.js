@@ -1,4 +1,4 @@
-const shared = require('../../app/shared')
+const shared = require(require('config').get('app-folder') + '/shared')
 const httpMocks = require('node-mocks-http')
 const jsonwebtoken = require('jsonwebtoken')
 const config = require('config')

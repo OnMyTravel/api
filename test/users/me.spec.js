@@ -1,6 +1,6 @@
-const app = require('../../index')
+const app = require(require('config').get('app-root') + '/index')
 const faker = require('faker')
-const User = require('../../app/users/model')
+const User = require(require('config').get('app-folder') + '/users/model')
 const httpStatus = require('http-status-codes')
 const config = require('config')
 const chai = require('chai')

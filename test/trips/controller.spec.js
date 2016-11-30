@@ -1,6 +1,6 @@
 /* global describe, it, before */
-let app = require('../../index')
 let Trip = require('../../app/trips/model')
+let app = require(require('config').get('app-root') + '/index')
 
 let faker = require('faker')
 let chai = require('chai')

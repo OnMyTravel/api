@@ -1,6 +1,6 @@
 var nock = require('nock')
-let app = require('../../index')
-let User = require('../../app/users/model')
+let app = require(require('config').get('app-root') + '/index')
+let User = require(require('config').get('app-folder') + '/users/model')
 let facebookResponses = require('./facebook.errors')
 let httpStatus = require('http-status-codes')
 let config = require('config')
