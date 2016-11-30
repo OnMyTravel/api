@@ -28,7 +28,7 @@ describe('Users', () => {
           .send({ access_token: UNAUTHORIZEDTOKEN })
           .end((e, res) => {
             res.statusCode.should.equal(facebookResponses.UNAUTHORIZED.status)
-            res.body.should.deep.equal(facebookResponses.UNAUTHORIZED.body)
+            res.body.should.deep.equal(facebookResponses.UNAUTHORIZED.expectedBody)
             done()
           })
       })
