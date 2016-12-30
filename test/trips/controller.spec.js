@@ -89,6 +89,27 @@ describe('Trips', function () {
               done()
             })
         })
+
+        it('should have a payload', (done) => {
+          chai.request(app)
+            .post('/trips')
+            .set('Authorization', 'Bearer ' + token)
+            .send({})
+            .end((e, res) => {
+              res.should.have.status(400)
+              res.body.should.be.deep.equal({
+                message: 'Trip validation failed',
+                name: 'ValidationError',
+                errors: {
+                  name: {
+                    message: 'Path `name` is required.',
+                    kind: 'required'
+                  }
+                }
+              });
+              done()
+            })
+        })
       })
 
       describe('when the payload is OK', () => {

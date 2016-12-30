@@ -15,7 +15,7 @@ function create (req, res) {
       return res.status(httpStatus.CREATED).json(createdTrip)
     })
   } else {
-    return res.status(httpStatus.BAD_REQUEST).json()
+    return res.status(httpStatus.BAD_REQUEST).json(shared.errors.format(errors))
   }
 }
 
