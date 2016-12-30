@@ -1,5 +1,5 @@
-const shared = require(require('config').get('app-folder') + '/shared')
 const config = require('config')
+const shared = require(config.get('app-folder') + '/shared')
 const jsonwebtoken = require('jsonwebtoken')
 const sinon = require('sinon')
 const sinonChai = require('sinon-chai')
