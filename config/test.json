@@ -1,6 +1,6 @@
 {
   "database": {
-      "host": "mongodb://localhost/onmytravel-dev"
+      "host": "mongodb://localhost/onmytravel-test"
   },
   "app-secret": "supersecret",
   "app-folder": "../../app",
