@@ -9,6 +9,7 @@ function isAuthenticated (request, response, next) {
       jsonwebtoken.verify(token, config.get('app-secret'))
       next()
     } catch (e) {
+      response.setHeader('WWW-Authenticate', 'bearer')
       response.status(httpStatus.BAD_REQUEST).json({
         'error': {
           'name': e.name,
@@ -17,13 +18,26 @@ function isAuthenticated (request, response, next) {
       })
     }
   } else {
-    response.status(httpStatus.UNAUTHORIZED).json({})
+    response.status(httpStatus.UNAUTHORIZED)
+    response.setHeader('WWW-Authenticate', 'bearer')
+    response.json({})
   }
 }
 
-function create (id, facebook_token) {
+function format (mongooseError) {
+  for (let property in mongooseError.errors) {
+    let propertyField = mongooseError.errors[property]
+    delete propertyField.name
+    delete propertyField.path
+    delete propertyField.properties
+  }
+
+  return mongooseError
+}
+
+function create (user_id, facebook_token) {
   return jsonwebtoken.sign({
-    id: id,
+    id: user_id,
     facebook_access_token: facebook_token
   }, config.get('app-secret'))
 }
@@ -38,4 +52,4 @@ function decode (token) {
   return decodedToken
 }
 
-module.exports = { isAuthenticated, tokens: { getToken, decode, create } }
+module.exports = { isAuthenticated, tokens: { getToken, decode, create }, errors: { format } }

@@ -1,14 +1,13 @@
-let Trip = require('./model')
-let httpStatus = require('http-status-codes')
+const Trip = require('./model')
+const httpStatus = require('http-status-codes')
+const shared = require('../shared')
 
 function create (req, res) {
-  if (!req.headers.hasOwnProperty('authorization')) {
-    res.setHeader('WWW-Authenticate', 'bearer')
-    res.sendStatus(httpStatus.UNAUTHORIZED)
-    return res.send()
-  }
+  let token = shared.tokens.getToken(req)
+  let decodedToken = shared.tokens.decode(token)
 
   let newTrip = new Trip(req.body)
+  newTrip.owner_id = decodedToken.id
   let errors = newTrip.validateSync()
 
   if (!errors) {
@@ -16,15 +15,11 @@ function create (req, res) {
       return res.status(httpStatus.CREATED).json(createdTrip)
     })
   } else {
-    return res.status(httpStatus.BAD_REQUEST).json()
+    return res.status(httpStatus.BAD_REQUEST).json(shared.errors.format(errors))
   }
 }
 
 function getAll (req, res) {
-  if (!req.headers.hasOwnProperty('authorization')) {
-    res.setHeader('WWW-Authenticate', 'bearer')
-    res.sendStatus(httpStatus.UNAUTHORIZED).json()
-  }
   res.json([])
 }
 

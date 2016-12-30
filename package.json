@@ -12,7 +12,8 @@
       "describe",
       "it",
       "beforeEach",
-      "before"
+      "before",
+      "after"
     ]
   },
   "repository": {
