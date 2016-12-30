@@ -57,19 +57,25 @@ describe('Shared', () => {
       })
 
       describe('when token has already expired', () => {
-        var token
+        let token
+        let request
+        let response
+
         before(() => {
           token = jsonwebtoken.sign({exp: 0}, config.get('app-secret'))
         })
 
-        it('should not call next and send 400 response', function () {
-          // Given
-          var request = httpMocks.createRequest({
+        beforeEach(() => {
+          request = httpMocks.createRequest({
             headers: {
               'Authorization': 'Bearer ' + token
             }
           })
-          var response = httpMocks.createResponse()
+          response = httpMocks.createResponse()
+        })
+
+        it('should not call next and send 400 response', function () {
+          // Given
           var next = sinon.spy()
 
           // When
@@ -86,6 +92,19 @@ describe('Shared', () => {
               'message': 'jwt expired'
             }
           })
+        })
+
+        it('should send an www-authenticate header', () => {
+          // Given
+          var next = sinon.spy()
+
+          // When
+          shared.isAuthenticated(request, response, next)
+
+          // Then
+          next.should.not.have.been.called
+          let headers = response._getHeaders()
+          headers.should.have.a.property('WWW-Authenticate')
         })
       })
     })

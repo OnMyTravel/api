@@ -7,7 +7,7 @@ const Trip = require(require('config').get('app-folder') + '/trips/model')
 const repository = require(require('config').get('app-folder') + '/trips/repository')
 
 describe('Trip', () => {
-  describe('Repository', () => {
+  xdescribe('Repository', () => {
     after(() => {
       Trip.remove({}).exec()
     })
