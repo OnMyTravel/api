@@ -24,6 +24,17 @@ function isAuthenticated (request, response, next) {
   }
 }
 
+function format (mongooseError) {
+  for (let property in mongooseError.errors) {
+    let propertyField = mongooseError.errors[property]
+    delete propertyField.name
+    delete propertyField.path
+    delete propertyField.properties
+  }
+
+  return mongooseError
+}
+
 function create (user_id, facebook_token) {
   return jsonwebtoken.sign({
     id: user_id,
@@ -41,4 +52,4 @@ function decode (token) {
   return decodedToken
 }
 
-module.exports = { isAuthenticated, tokens: { getToken, decode, create } }
+module.exports = { isAuthenticated, tokens: { getToken, decode, create }, errors: { format } }

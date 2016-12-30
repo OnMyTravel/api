@@ -1,7 +1,7 @@
-const shared = require(require('config').get('app-folder') + '/shared')
+const config = require('config')
+const shared = require(config.get('app-folder') + '/shared')
 const httpMocks = require('node-mocks-http')
 const jsonwebtoken = require('jsonwebtoken')
-const config = require('config')
 const faker = require('faker')
 
 const chai = require('chai')
