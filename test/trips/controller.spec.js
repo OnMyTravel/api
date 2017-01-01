@@ -1,17 +1,20 @@
 /* global describe, it, before */
-let app = require(require('config').get('app-root') + '/index')
-let shared = require(require('config').get('app-folder') + '/shared')
+const config = require('config')
+const app = require(config.get('app-root') + '/index')
+const Faker = require('faker')
+const Trip = require(config.get('app-folder') + '/trips/model')
+const shared = require(config.get('app-folder') + '/shared')
 
-let chai = require('chai')
-let chaiHttp = require('chai-http')
-let mongoose = require('mongoose')
+const chai = require('chai')
+const chaiHttp = require('chai-http')
+const mongoose = require('mongoose')
 
 chai.should()
 chai.use(chaiHttp)
 
 describe('Trips', function () {
   describe('controller', function () {
-    xdescribe(':getAll', () => {
+    describe(':getAll', () => {
       describe('when the user is not authenticated', () => {
         it('should answer UNAUTHORIZED', (done) => {
           chai.request(app)
@@ -24,27 +27,57 @@ describe('Trips', function () {
       })
 
       describe('when the user has correctly authenticated himself', () => {
-        let token
-        before(function () {
-          token = shared.tokens.create(mongoose.Types.ObjectId(), '')
+        let token, userId, expectedTrip
 
+        before(function (done) {
+          userId = mongoose.Types.ObjectId()
+          expectedTrip = {
+            name: Faker.lorem.sentence(10),
+            owner_id: userId.toString()
+          }
+
+          new Trip(expectedTrip).save((err, data) => {
+            done(err)
+          })
         })
 
-        it('it should GET all the trips', (done) => {
-          chai.request(app)
-            .get('/trips')
-            .set('Authorization', 'Bearer ' + token)
-            .end((err, res) => {
-              if (err) { done(err) }
+        describe('when the database access is on error', () => {
+          before(() => {
+            token = shared.tokens.create('', '')
+          })
 
-              res.should.have.status(200)
-              res.body.should.be.a('array')
-              res.body.length.should.be.eql(1)
+          it('it should return a 400 error', (done) => {
+            chai.request(app)
+              .get('/trips')
+              .set('Authorization', 'Bearer ' + token)
+              .end((err, res) => {
+                res.should.have.status(400)
+                done()
+              })
+          })
+        })
 
-              let trip = res.body[0]
-              trip.id.should.equal()
-              done()
-            })
+        describe('when there is one trip', () => {
+          before(() => {
+            token = shared.tokens.create(userId, '')
+          })
+
+          it('it should GET all the trips', (done) => {
+            chai.request(app)
+              .get('/trips')
+              .set('Authorization', 'Bearer ' + token)
+              .end((err, res) => {
+                if (err) { done(err) }
+
+                res.should.have.status(200)
+                res.body.should.be.a('array')
+                res.body.length.should.be.eql(1)
+                let trip = res.body[0]
+                trip.name.should.equal(expectedTrip.name)
+                trip.owner_id.should.equal(expectedTrip.owner_id)
+                done()
+              })
+          })
         })
       })
     })
@@ -106,7 +139,7 @@ describe('Trips', function () {
                     kind: 'required'
                   }
                 }
-              });
+              })
               done()
             })
         })
