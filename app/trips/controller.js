@@ -20,7 +20,16 @@ function create (req, res) {
 }
 
 function getAll (req, res) {
-  res.json([])
+  let token = shared.tokens.getToken(req)
+  let decodedToken = shared.tokens.decode(token)
+
+  return Trip.find({ owner_id: decodedToken.id }, (err, data) => {
+    if (err) {
+      return res.status(httpStatus.BAD_REQUEST).json()
+    }
+
+    res.json(data)
+  })
 }
 
 module.exports = { create, getAll }
