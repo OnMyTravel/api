@@ -1,4 +1,4 @@
-const Trip = require('./model')
+const tripRepository = require('./repository')
 const httpStatus = require('http-status-codes')
 const shared = require('../shared')
 
@@ -6,30 +6,29 @@ function create (req, res) {
   let token = shared.tokens.getToken(req)
   let decodedToken = shared.tokens.decode(token)
 
-  let newTrip = new Trip(req.body)
-  newTrip.owner_id = decodedToken.id
-  let errors = newTrip.validateSync()
+  let newTripPayload = req.body
+  newTripPayload.owner_id = decodedToken.id
 
-  if (!errors) {
-    return newTrip.save().then((createdTrip) => {
+  tripRepository
+    .create(newTripPayload)
+    .then((createdTrip) => {
       return res.status(httpStatus.CREATED).json(createdTrip)
+    }, (errors) => {
+      return res.status(httpStatus.BAD_REQUEST).json(shared.errors.format(errors))
     })
-  } else {
-    return res.status(httpStatus.BAD_REQUEST).json(shared.errors.format(errors))
-  }
 }
 
 function getAll (req, res) {
   let token = shared.tokens.getToken(req)
   let decodedToken = shared.tokens.decode(token)
 
-  return Trip.find({ owner_id: decodedToken.id }, (err, data) => {
-    if (err) {
+  tripRepository
+    .findByOwnerId(decodedToken.id)
+    .then((trip) => {
+      res.json(trip)
+    }, () => {
       return res.status(httpStatus.BAD_REQUEST).json()
-    }
-
-    res.json(data)
-  })
+    })
 }
 
 module.exports = { create, getAll }
