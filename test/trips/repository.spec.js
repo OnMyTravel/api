@@ -1,3 +1,4 @@
+const Mongoose = require('mongoose')
 const Faker = require('faker')
 const chai = require('chai')
 chai.should()
@@ -7,7 +8,7 @@ const Trip = require(require('config').get('app-folder') + '/trips/model')
 const repository = require(require('config').get('app-folder') + '/trips/repository')
 
 describe('Trip', () => {
-  xdescribe('Repository', () => {
+  describe('Repository', () => {
     after(() => {
       Trip.remove({}).exec()
     })
@@ -15,7 +16,7 @@ describe('Trip', () => {
     describe(':findById', () => {
       let trip
       before((done) => {
-        new Trip({ name: 'My new trip' }).save()
+        new Trip({ name: 'My new trip', owner_id: Mongoose.Types.ObjectId() }).save()
           .then((createdTrip) => {
             trip = createdTrip
             done()
@@ -46,10 +47,12 @@ describe('Trip', () => {
 
       it('should return the created trip', (done) => {
         let name = Faker.lorem.sentence()
+        let owner_id = Mongoose.Types.ObjectId()
 
-        repository.create({ name })
+        repository.create({ name, owner_id })
           .then((createdTrip) => {
             createdTrip.name.should.be.equal(name)
+            createdTrip.owner_id.should.be.equal(owner_id)
             done()
           })
       })
@@ -60,6 +63,41 @@ describe('Trip', () => {
             done(new Error('Mongoose model validation should not succeed'))
           })
           .catch(() => {
+            done()
+          })
+      })
+    })
+
+    describe(':findByOwnerId', () => {
+      let owner_id, another_owner_id
+      let nameOne, nameTwo, nameThree
+      before((done) => {
+        nameOne = Faker.lorem.sentence()
+        nameTwo = Faker.lorem.sentence()
+        nameThree = Faker.lorem.sentence()
+        owner_id = Mongoose.Types.ObjectId()
+        another_owner_id = Mongoose.Types.ObjectId()
+
+        Trip.create([{ name: nameOne, owner_id }, { name: nameTwo, owner_id: another_owner_id }, { name: nameThree, owner_id }])
+          .then((createdTrip) => {
+            done()
+          })
+      })
+
+      it('checks sanity', () => {
+        repository.should.have.property('findByOwnerId')
+        repository.findByOwnerId.should.be.a('function')
+      })
+
+      it('should return one trip', (done) => {
+        repository
+          .findByOwnerId(owner_id)
+          .then((foundTrips) => {
+            foundTrips.should.have.length(2)
+            foundTrips[0].name.should.equal(nameOne)
+            foundTrips[0].owner_id.toString().should.equal(owner_id.toString())
+            foundTrips[1].name.should.equal(nameThree)
+            foundTrips[1].owner_id.toString().should.equal(owner_id.toString())
             done()
           })
       })
