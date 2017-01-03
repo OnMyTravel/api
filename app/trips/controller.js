@@ -31,4 +31,16 @@ function getAll (req, res) {
     })
 }
 
-module.exports = { create, getAll }
+function getOne (req, res) {
+  return tripRepository
+    .findById(req.params.id)
+    .then((trip) => {
+      if (trip) {
+        return res.json(trip)
+      }
+
+      return res.status(httpStatus.NOT_FOUND).json()
+    })
+}
+
+module.exports = { create, getAll, getOne }
