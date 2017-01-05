@@ -292,5 +292,75 @@ describe('Trips', function () {
         })
       })
     })
+
+    describe(':deleteOne', () => {
+      let userId, trip, token
+      beforeEach((done) => {
+        userId = mongoose.Types.ObjectId().toString()
+        token = shared.tokens.create(userId, '')
+        Trip.create({ name: Faker.lorem.sentence(10), owner_id: userId }, (err, createdTrip) => {
+          trip = createdTrip
+          done(err)
+        })
+      })
+
+      describe('when the user is not connected', () => {
+        it('should return UNAUTHORIZED status code', (done) => {
+          chai.request(app)
+            .delete('/trips/' + trip._id)
+            .end((e, res) => {
+              res.should.have.status(401)
+              done()
+            })
+        })
+      })
+
+      describe('when the is connected', () => {
+        describe('when the trip does not exist', () => {
+          it('should return a NOT_FOUND status code', (done) => {
+            chai.request(app)
+              .delete('/trips/' + mongoose.Types.ObjectId().toString())
+              .set('Authorization', 'Bearer ' + token)
+              .end((e, res) => {
+                res.should.have.status(404)
+                done()
+              })
+          })
+        })
+
+        describe('when the user is not the trip\'s user', () => {
+          it('should return a FORBIDDEN status code', (done) => {
+            let otherToken = shared.tokens.create(mongoose.Types.ObjectId().toString(), '')
+            chai.request(app)
+              .delete('/trips/' + trip._id)
+              .set('Authorization', 'Bearer ' + otherToken)
+              .end((e, res) => {
+                res.should.have.status(403)
+                done()
+              })
+          })
+        })
+
+        describe('when the user is allowed to delete the trip', () => {
+          it('should return an OK status code', (done) => {
+            chai.request(app)
+              .delete('/trips/' + trip._id)
+              .set('Authorization', 'Bearer ' + token)
+              .end((e, res) => {
+                res.should.have.status(200)
+                Trip
+                  .findById(trip._id)
+                  .then((trip) => {
+                    if (trip) {
+                      done(new Error('We should not find the trip again'))
+                    } else {
+                      done()
+                    }
+                  })
+              })
+          })
+        })
+      })
+    })
   })
 })
