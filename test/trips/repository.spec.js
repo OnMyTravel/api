@@ -4,8 +4,9 @@ const chai = require('chai')
 chai.should()
 chai.use(require('sinon-chai'))
 
-const Trip = require(require('config').get('app-folder') + '/trips/model')
-const repository = require(require('config').get('app-folder') + '/trips/repository')
+const config = require('config')
+const Trip = require(config.get('app-folder') + '/trips/model')
+const repository = require(config.get('app-folder') + '/trips/repository')
 
 describe('Trip', () => {
   describe('Repository', () => {
@@ -98,6 +99,47 @@ describe('Trip', () => {
             foundTrips[0].owner_id.toString().should.equal(owner_id.toString())
             foundTrips[1].name.should.equal(nameThree)
             foundTrips[1].owner_id.toString().should.equal(owner_id.toString())
+            done()
+          })
+      })
+    })
+
+    describe(':updateByIdAndOwnerId', () => {
+      let trip, ownerId
+      before((done) => {
+        ownerId = Mongoose.Types.ObjectId()
+        new Trip({ name: 'My new trip', owner_id: ownerId }).save()
+          .then((createdTrip) => {
+            trip = createdTrip
+            done()
+          })
+      })
+
+      it('checks sanity', () => {
+        repository.should.have.property('updateByIdAndOwnerId')
+      })
+
+      it('should partially update the document', (done) => {
+        repository
+          .updateByIdAndOwnerId(trip._id, ownerId, {name: 'NEW TRIP NAME'})
+          .then((data) => {
+            Trip
+              .findById(trip._id)
+              .then((trip) => {
+                trip.name.should.equal('NEW TRIP NAME')
+                done()
+              })
+          }, (er) => {
+            done(new Error('Should not fail with an OK payload'))
+          })
+      })
+
+      it('should return an error when payload is wrong', (done) => {
+        repository
+          .updateByIdAndOwnerId(trip._id, null, {name: null})
+          .then((data) => {
+            done(new Error('Should not succeed with a name null'))
+          }, (err) => {
             done()
           })
       })

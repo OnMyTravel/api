@@ -12,4 +12,8 @@ function create (model) {
   return new Trip(model).save()
 }
 
-module.exports = { findById, create, findByOwnerId }
+function updateByIdAndOwnerId (_id, owner_id, model) {
+  return Trip.update({ _id, owner_id }, { $set: model }, {runValidators: true})
+}
+
+module.exports = { findById, create, findByOwnerId, updateByIdAndOwnerId }

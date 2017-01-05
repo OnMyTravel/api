@@ -10,5 +10,6 @@ var shared = require('../shared')
 router.get('/:id', controller.getOne)
 router.get('/', shared.isAuthenticated, controller.getAll)
 router.post('/', shared.isAuthenticated, controller.create)
+router.put('/:id', shared.isAuthenticated, controller.updateOne)
 
 module.exports = router
