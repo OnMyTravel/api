@@ -50,7 +50,7 @@ describe('Trips', function () {
             chai.request(app)
               .get('/trips')
               .set('Authorization', 'Bearer ' + token)
-              .end((err, res) => {
+              .end((e, res) => {
                 res.should.have.status(400)
                 done()
               })
@@ -91,7 +91,7 @@ describe('Trips', function () {
       })
 
       describe('when not authenticated', () => {
-        it('should return Unauthorized', (done) => {
+        it('should return UNAUTHORIZED', (done) => {
           chai.request(app)
             .post('/trips')
             .end((e, res) => {
@@ -199,6 +199,97 @@ describe('Trips', function () {
             res.should.have.status(404)
             done()
           })
+      })
+    })
+
+    describe(':updateOne', () => {
+      let trip, userId
+      before((done) => {
+        userId = mongoose.Types.ObjectId()
+        Trip.create({ name: Faker.lorem.sentence(10), owner_id: userId.toString() }, (err, createdTrip) => {
+          trip = createdTrip
+          done(err)
+        })
+      })
+
+      describe('when the user is not authenticated', () => {
+        it('should respond UNAUTHORIZED', (done) => {
+          chai.request(app)
+            .put('/trips/' + trip._id)
+            .end((e, res) => {
+              res.should.have.status(401)
+              done()
+            })
+        })
+      })
+
+      describe('when the user is not allowed to update this trip', () => {
+        let token
+        before(() => {
+          token = shared.tokens.create(mongoose.Types.ObjectId(), '')
+        })
+
+        it('should respond FORBIDDEN', (done) => {
+          chai.request(app)
+            .put('/trips/' + trip._id)
+            .set('Authorization', 'Bearer ' + token)
+            .end((e, res) => {
+              res.should.have.status(403)
+              done()
+            })
+        })
+      })
+
+      describe('when the user does not exist', () => {
+        let token
+        before(() => {
+          token = shared.tokens.create(mongoose.Types.ObjectId(), '')
+        })
+
+        it('should respond FORBIDDEN', (done) => {
+          chai.request(app)
+            .put('/trips/' + mongoose.Types.ObjectId())
+            .set('Authorization', 'Bearer ' + token)
+            .end((e, res) => {
+              res.should.have.status(404)
+              done()
+            })
+        })
+      })
+
+      describe('when the user is the trip\'s owner', () => {
+        let token
+        before(() => {
+          token = shared.tokens.create(userId, '')
+        })
+
+        it('should respond 200', (done) => {
+          chai.request(app)
+            .put('/trips/' + trip._id)
+            .set('Authorization', 'Bearer ' + token)
+            .send({ name: 'NEW TRIP NAME' })
+            .end((e, res) => {
+              res.should.have.status(200)
+
+              Trip
+                .findById(trip._id)
+                .then((trip) => {
+                  trip.name.should.be.equal('NEW TRIP NAME')
+                  done()
+                })
+            })
+        })
+
+        it('should respond 400 with a wrong payload', (done) => {
+          chai.request(app)
+            .put('/trips/' + trip._id)
+            .set('Authorization', 'Bearer ' + token)
+            .send({ name: '' })
+            .end((e, res) => {
+              res.should.have.status(400)
+              done()
+            })
+        })
       })
     })
   })

@@ -43,4 +43,29 @@ function getOne (req, res) {
     })
 }
 
-module.exports = { create, getAll, getOne }
+function updateOne (req, res) {
+  return tripRepository
+    .findById(req.params.id)
+    .then((trip) => {
+      if (trip) {
+        let token = shared.tokens.getToken(req)
+        let decodedToken = shared.tokens.decode(token)
+
+        if (trip.owner_id.toString() === decodedToken.id) {
+          tripRepository
+            .updateByIdAndOwnerId(trip._id, trip.owner_id, req.body)
+            .then((updateResult) => {
+              res.status(httpStatus.OK).json()
+            }, (err) => {
+              res.status(httpStatus.BAD_REQUEST).json(shared.errors.format(err))
+            })
+        } else {
+          res.status(httpStatus.FORBIDDEN).json()
+        }
+      } else {
+        res.status(httpStatus.NOT_FOUND).json()
+      }
+    })
+}
+
+module.exports = { create, getAll, getOne, updateOne }
