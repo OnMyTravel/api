@@ -139,8 +139,40 @@ describe('Trip', () => {
           .updateByIdAndOwnerId(trip._id, null, {name: null})
           .then((data) => {
             done(new Error('Should not succeed with a name null'))
-          }, (err) => {
+          }, () => {
             done()
+          })
+      })
+    })
+
+    describe(':deleteById', () => {
+      let trip
+      before((done) => {
+        new Trip({ name: 'My new trip', owner_id: Mongoose.Types.ObjectId() }).save()
+          .then((createdTrip) => {
+            trip = createdTrip
+            done()
+          })
+      })
+
+      it('checks sanity', () => {
+        repository.should.have.property('deleteById')
+        repository.deleteById.should.be.a('function')
+      })
+
+      it('should remove the selected trip', (done) => {
+        repository
+          .deleteById(trip._id)
+          .then(() => {
+            Trip
+              .findById(trip._id)
+              .then((trip) => {
+                if (trip) {
+                  done(new Error('Trip should have been removed'))
+                } else {
+                  done()
+                }
+              })
           })
       })
     })

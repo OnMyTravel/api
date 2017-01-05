@@ -68,4 +68,29 @@ function updateOne (req, res) {
     })
 }
 
-module.exports = { create, getAll, getOne, updateOne }
+function deleteOne (req, res) {
+  return tripRepository
+    .findById(req.params.id)
+    .then((trip) => {
+      if (trip) {
+        let token = shared.tokens.getToken(req)
+        let decodedToken = shared.tokens.decode(token)
+
+        if (decodedToken.id === trip.owner_id.toString()) {
+          tripRepository
+            .deleteById(trip._id)
+            .then(() => {
+              res.status(httpStatus.OK).json()
+            }, () => {
+              res.status(httpStatus.INTERNAL_SERVER_ERROR).json()
+            })
+        } else {
+          res.status(httpStatus.FORBIDDEN).json()
+        }
+      } else {
+        res.status(httpStatus.NOT_FOUND).json()
+      }
+    })
+}
+
+module.exports = { create, getAll, getOne, updateOne, deleteOne }

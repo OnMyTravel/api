@@ -16,4 +16,8 @@ function updateByIdAndOwnerId (_id, owner_id, model) {
   return Trip.update({ _id, owner_id }, { $set: model }, {runValidators: true})
 }
 
-module.exports = { findById, create, findByOwnerId, updateByIdAndOwnerId }
+function deleteById (_id) {
+  return Trip.findByIdAndRemove(_id)
+}
+
+module.exports = { findById, create, findByOwnerId, updateByIdAndOwnerId, deleteById }
