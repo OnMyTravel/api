@@ -23,4 +23,4 @@ let StepSchema = new Schema(
   }
 )
 
-module.exports = mongoose.model('Trip', StepSchema)
+module.exports = mongoose.model('Step', StepSchema)
