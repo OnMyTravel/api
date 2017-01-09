@@ -1,11 +1,14 @@
 'use strict'
 
-var express = require('express')
-var router = express.Router({mergeParams: true})
+const express = require('express')
+const router = express.Router({mergeParams: true})
 
-var controller = require('./controller')
+const controller = require('./controller')
+const shared = require('../shared')
+const tripMiddleware = require('../trips/middleware')
 
 // Routes
-router.get('/', controller.get)
+router.get('/', shared.isAuthenticated, controller.get)
+router.post('/', shared.isAuthenticated, tripMiddleware.existsAndIsEditable, controller.create)
 
 module.exports = router
