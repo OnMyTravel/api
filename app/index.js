@@ -1,12 +1,12 @@
-var bodyParser = require('body-parser')
-var express = require('express')
-var app = express()
+const bodyParser = require('body-parser')
+const express = require('express')
+const app = express()
 app.use(bodyParser.json())
 
-var pjson = require('../package.json')
+const pjson = require('../package.json')
 
-app.use('/steps', require('./steps/routes'))
 app.use('/trips', require('./trips/routes'))
+app.use('/trips/:tripid/steps', require('./steps/routes'))
 app.use('/users', require('./users/routes'))
 
 app.get('/', function (req, res) {
