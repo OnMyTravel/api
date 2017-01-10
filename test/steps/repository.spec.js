@@ -114,10 +114,41 @@ describe('Step', () => {
       it('should return steps', (done) => {
         repository
           .findByTripIdAndStepId(trip_id, step._id)
-          .then((steps) => {
-            steps.should.have.length(1)
-            steps[0].message.should.equal(message)
+          .then((step) => {
+            step.message.should.equal(message)
             done()
+          })
+      })
+    })
+
+    describe(':deleteById', () => {
+      let step
+      before((done) => {
+        new Step({ message: 'My new trip', trip_id: Mongoose.Types.ObjectId() }).save()
+          .then((createdStep) => {
+            step = createdStep
+            done()
+          })
+      })
+
+      it('checks sanity', () => {
+        repository.should.have.property('deleteById')
+        repository.deleteById.should.be.a('function')
+      })
+
+      it('should remove the selected step', (done) => {
+        repository
+          .deleteById(step._id)
+          .then(() => {
+            Step
+              .findById(step._id)
+              .then((step) => {
+                if (step) {
+                  done(new Error('Step should have been removed'))
+                } else {
+                  done()
+                }
+              })
           })
       })
     })
