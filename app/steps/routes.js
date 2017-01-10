@@ -8,7 +8,7 @@ const shared = require('../shared')
 const tripMiddleware = require('../trips/middleware')
 
 // Routes
-router.get('/', shared.isAuthenticated, controller.get)
+router.get('/', tripMiddleware.exists, controller.get)
 router.post('/', shared.isAuthenticated, tripMiddleware.existsAndIsEditable, controller.create)
 
 module.exports = router
