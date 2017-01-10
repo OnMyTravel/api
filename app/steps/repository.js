@@ -8,4 +8,8 @@ function findByTripId (trip_id) {
   return Step.find({ trip_id })
 }
 
-module.exports = { create, findByTripId }
+function findByTripIdAndStepId (trip_id, step_id) {
+  return Step.find({ trip_id, _id: step_id })
+}
+
+module.exports = { create, findByTripId, findByTripIdAndStepId }

@@ -92,5 +92,34 @@ describe('Step', () => {
           })
       })
     })
+
+    describe(':findByTripIdAndStepId', () => {
+      let trip_id, step, message
+      before((done) => {
+        trip_id = Mongoose.Types.ObjectId()
+        message = Faker.lorem.sentence()
+        Step
+          .create([{ message, trip_id }, { message: Faker.lorem.sentence(), trip_id: Mongoose.Types.ObjectId() }])
+          .then((createdSteps) => {
+            step = createdSteps[0]
+            done()
+          })
+      })
+
+      it('checks sanity', () => {
+        repository.should.have.property('findByTripIdAndStepId')
+        repository.findByTripIdAndStepId.should.be.a('function')
+      })
+
+      it('should return steps', (done) => {
+        repository
+          .findByTripIdAndStepId(trip_id, step._id)
+          .then((steps) => {
+            steps.should.have.length(1)
+            steps[0].message.should.equal(message)
+            done()
+          })
+      })
+    })
   })
 })
