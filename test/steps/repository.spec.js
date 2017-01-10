@@ -6,7 +6,6 @@ chai.use(require('sinon-chai'))
 
 const config = require('config')
 const Step = require(config.get('app-folder') + '/steps/model')
-const Trip = require(config.get('app-folder') + '/trips/model')
 const repository = require(config.get('app-folder') + '/steps/repository')
 
 describe('Step', () => {
@@ -56,6 +55,39 @@ describe('Step', () => {
             done(new Error('Mongoose model validation should not succeed'))
           })
           .catch(() => {
+            done()
+          })
+      })
+    })
+
+    describe(':findByTripId', () => {
+      let firstMessage, thirdMessage, trip_id
+      before((done) => {
+        firstMessage = Faker.lorem.sentence()
+        let messageTwo = Faker.lorem.sentence()
+        thirdMessage = Faker.lorem.sentence()
+        trip_id = Mongoose.Types.ObjectId()
+        Step
+          .create([{ trip_id, message: firstMessage }, { trip_id: Mongoose.Types.ObjectId(), message: messageTwo }, { trip_id, message: thirdMessage }])
+          .then(() => {
+            done()
+          })
+      })
+
+      it('checks sanity', () => {
+        repository.should.have.property('findByTripId')
+        repository.findByTripId.should.be.a('function')
+      })
+
+      it('should return trip\'s steps', (done) => {
+        repository
+          .findByTripId(trip_id)
+          .then((trips) => {
+            trips.should.have.length(2)
+            trips[0].trip_id.toString().should.equal(trip_id.toString())
+            trips[0].message.should.equal(firstMessage)
+            trips[1].trip_id.toString().should.equal(trip_id.toString())
+            trips[1].message.should.equal(thirdMessage)
             done()
           })
       })

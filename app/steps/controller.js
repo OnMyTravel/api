@@ -2,8 +2,11 @@ const statusCode = require('http-status-codes')
 const repository = require('./repository')
 
 function get (req, res) {
-  res.setHeader('WWW-Authenticate', 'bearer')
-  res.sendStatus(statusCode.UNAUTHORIZED)
+  return repository
+    .findByTripId(req.params.tripid)
+    .then((trips) => {
+      res.status(statusCode.OK).json(trips)
+    })
 }
 
 function create (req, res) {

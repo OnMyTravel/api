@@ -2,6 +2,7 @@
 const config = require('config')
 const app = require(config.get('app-root') + '/index')
 const Trip = require(config.get('app-folder') + '/trips/model')
+const Step = require(config.get('app-folder') + '/steps/model')
 const Faker = require('faker')
 const mongoose = require('mongoose')
 const shared = require(config.get('app-folder') + '/shared')
@@ -14,12 +15,63 @@ chai.use(chaiHttp)
 describe('Steps', () => {
   describe('controller', () => {
     describe(':get', () => {
-      describe('when the user is not authenticated', () => {
-        it('should return UNAUTHORIZED', (done) => {
+      describe('when the trip does not exists', () => {
+        it('should return NOT_FOUND', (done) => {
           chai.request(app)
-            .get('/trips/:id/steps')
+            .get('/trips/' + mongoose.Types.ObjectId() + '/steps')
             .end((e, res) => {
-              res.should.have.status(401)
+              res.should.have.status(404)
+              done()
+            })
+        })
+      })
+
+      describe('when the trip exists', () => {
+        let trip, firstTripStep, secondTripStep
+
+        before((done) => {
+          let name = Faker.lorem.sentence()
+          let owner_id = mongoose.Types.ObjectId()
+          Trip.create({ name, owner_id })
+            .then((createdTrip) => {
+              trip = createdTrip
+
+              firstTripStep = {
+                trip_id: trip._id,
+                message: Faker.lorem.sentence()
+              }
+              secondTripStep = {
+                trip_id: trip._id,
+                message: Faker.lorem.sentence()
+              }
+              let otherTripStep = {
+                trip_id: mongoose.Types.ObjectId(),
+                message: Faker.lorem.sentence()
+              }
+
+              Step
+                .create([firstTripStep, secondTripStep, otherTripStep])
+                .then((createdSteps) => {
+                  done()
+                })
+            })
+        })
+
+        it('should return OK', (done) => {
+          chai.request(app)
+            .get('/trips/' + trip._id + '/steps')
+            .end((e, res) => {
+              res.should.have.status(200)
+              done()
+            })
+        })
+
+        it('should return trip\'s steps', (done) => {
+          chai.request(app)
+            .get('/trips/' + trip._id + '/steps')
+            .end((e, res) => {
+              res.should.have.status(200)
+              res.body.should.have.length(2)
               done()
             })
         })
