@@ -14,6 +14,107 @@ chai.use(chaiHttp)
 
 describe('Steps', () => {
   describe('controller', () => {
+    describe(':deleteOne', () => {
+      describe('when the user is not authenticated', () => {
+        it('should return UNAUTHORIZED', (done) => {
+          chai.request(app)
+            .delete('/trips/' + mongoose.Types.ObjectId() + '/steps/' + mongoose.Types.ObjectId())
+            .end((e, res) => {
+              res.should.have.status(401)
+              done()
+            })
+        })
+      })
+
+      describe('when the trip does not exist', () => {
+        it('should return NOT_FOUND', (done) => {
+          let token = shared.tokens.create('', '')
+
+          chai.request(app)
+            .delete('/trips/' + mongoose.Types.ObjectId() + '/steps/' + mongoose.Types.ObjectId())
+            .set('Authorization', 'Bearer ' + token)
+            .end((e, res) => {
+              res.should.have.status(404)
+              done()
+            })
+        })
+      })
+
+      describe('when the trip exists', () => {
+        let trip, token
+
+        before((done) => {
+          let name = Faker.lorem.sentence()
+          let owner_id = mongoose.Types.ObjectId()
+          token = shared.tokens.create(owner_id, '')
+
+          Trip.create({ name, owner_id })
+            .then((createdTrip) => {
+              trip = createdTrip
+              done()
+            })
+        })
+
+        describe('but it is not the user\'s', () => {
+          it('should return FORBIDDEN', (done) => {
+            let token = shared.tokens.create('', '')
+            chai.request(app)
+              .delete('/trips/' + trip._id + '/steps/' + mongoose.Types.ObjectId())
+              .set('Authorization', 'Bearer ' + token)
+              .end((e, res) => {
+                res.should.have.status(403)
+                done()
+              })
+          })
+        })
+
+        describe('but the step does not exist', () => {
+          it('should return NOT_FOUND', (done) => {
+            chai.request(app)
+              .delete('/trips/' + trip._id + '/steps/' + mongoose.Types.ObjectId())
+              .set('Authorization', 'Bearer ' + token)
+              .end((e, res) => {
+                res.should.have.status(404)
+                done()
+              })
+          })
+        })
+
+        describe('and the step exists', () => {
+          let step
+          before((done) => {
+            Step
+              .create({
+                trip_id: trip._id,
+                message: Faker.lorem.sentence()
+              })
+              .then((createdStep) => {
+                step = createdStep
+                done()
+              })
+          })
+
+          it('should return OK', (done) => {
+            chai.request(app)
+              .delete('/trips/' + trip._id + '/steps/' + step._id)
+              .set('Authorization', 'Bearer ' + token)
+              .end((e, res) => {
+                res.should.have.status(200)
+                Step
+                  .findById(step._id)
+                  .then((step) => {
+                    if (step) {
+                      done(new Error('Step should have been removed'))
+                    } else {
+                      done()
+                    }
+                  })
+              })
+          })
+        })
+      })
+    })
+
     describe(':get', () => {
       describe('when the trip does not exists', () => {
         it('should return NOT_FOUND', (done) => {

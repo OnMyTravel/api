@@ -22,4 +22,12 @@ function create (req, res) {
     })
 }
 
-module.exports = { get, create }
+function deleteOne (req, res) {
+  repository
+    .deleteById(req.params.stepid)
+    .then(() => {
+      res.status(200).json()
+    })
+}
+
+module.exports = { get, create, deleteOne }

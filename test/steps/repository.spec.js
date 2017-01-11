@@ -92,5 +92,65 @@ describe('Step', () => {
           })
       })
     })
+
+    describe(':findByTripIdAndStepId', () => {
+      let trip_id, step, message
+      before((done) => {
+        trip_id = Mongoose.Types.ObjectId()
+        message = Faker.lorem.sentence()
+        Step
+          .create([{ message, trip_id }, { message: Faker.lorem.sentence(), trip_id: Mongoose.Types.ObjectId() }])
+          .then((createdSteps) => {
+            step = createdSteps[0]
+            done()
+          })
+      })
+
+      it('checks sanity', () => {
+        repository.should.have.property('findByTripIdAndStepId')
+        repository.findByTripIdAndStepId.should.be.a('function')
+      })
+
+      it('should return steps', (done) => {
+        repository
+          .findByTripIdAndStepId(trip_id, step._id)
+          .then((step) => {
+            step.message.should.equal(message)
+            done()
+          })
+      })
+    })
+
+    describe(':deleteById', () => {
+      let step
+      before((done) => {
+        new Step({ message: 'My new trip', trip_id: Mongoose.Types.ObjectId() }).save()
+          .then((createdStep) => {
+            step = createdStep
+            done()
+          })
+      })
+
+      it('checks sanity', () => {
+        repository.should.have.property('deleteById')
+        repository.deleteById.should.be.a('function')
+      })
+
+      it('should remove the selected step', (done) => {
+        repository
+          .deleteById(step._id)
+          .then(() => {
+            Step
+              .findById(step._id)
+              .then((step) => {
+                if (step) {
+                  done(new Error('Step should have been removed'))
+                } else {
+                  done()
+                }
+              })
+          })
+      })
+    })
   })
 })
