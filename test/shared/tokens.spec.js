@@ -1,8 +1,16 @@
-const config = require('config')
-const shared = require(config.get('app-folder') + '/shared')
-const httpMocks = require('node-mocks-http')
-const jsonwebtoken = require('jsonwebtoken')
 const faker = require('faker')
+const sinon = require('sinon')
+const config = require('config')
+const proxyquire = require('proxyquire')
+const jsonwebtoken = require('jsonwebtoken')
+const httpMocks = require('node-mocks-http')
+
+let mocks = {
+  jsonwebtoken: {
+    sign: sinon.spy()
+  }
+}
+const shared = proxyquire(config.get('app-folder') + '/shared', mocks)
 
 const chai = require('chai')
 chai.should()
@@ -20,7 +28,22 @@ describe('Shared', () => {
       token = jsonwebtoken.sign(tokenPayload, config.get('app-secret'))
     })
 
-    describe('getToken', () => {
+    describe(':create', () => {
+      it('checks sanity', () => {
+        shared.tokens.create.should.be.defined
+      })
+
+      it('should create a token that expires in 1h', () => {
+        // When
+        shared.tokens.create('user_id', 'facebook_token')
+
+        // Then
+        mocks.jsonwebtoken.sign
+          .should.have.been.calledWith({ facebook_access_token: 'facebook_token', id: 'user_id' }, config.get('app-secret'), { expiresIn: '1h' })
+      })
+    })
+
+    describe(':getToken', () => {
       it('checks sanity', () => {
         shared.tokens.getToken.should.be.defined
       })
@@ -41,7 +64,7 @@ describe('Shared', () => {
       })
     })
 
-    describe('decode', () => {
+    describe(':decode', () => {
       it('checks sanity', () => {
         shared.tokens.decode.should.be.defined
       })
