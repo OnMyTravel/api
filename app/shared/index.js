@@ -39,7 +39,7 @@ function create (user_id, facebook_token) {
   return jsonwebtoken.sign({
     id: user_id,
     facebook_access_token: facebook_token
-  }, config.get('app-secret'))
+  }, config.get('app-secret'), { expiresIn: '1h' })
 }
 
 function getToken (request) {
