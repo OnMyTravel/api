@@ -1,4 +1,5 @@
 const tripRepository = require('./repository')
+const stepRepository = require('../steps/repository')
 const httpStatus = require('http-status-codes')
 const shared = require('../shared')
 
@@ -60,7 +61,13 @@ function deleteOne (req, res) {
   return tripRepository
     .deleteById(req.params.tripid)
     .then(() => {
-      res.status(httpStatus.OK).json()
+      stepRepository
+        .deleteByTripId(req.params.tripid)
+        .then(() => {
+          res.status(httpStatus.OK).json()
+        }, () => {
+          res.status(httpStatus.INTERNAL_SERVER_ERROR).json()
+        })
     }, () => {
       res.status(httpStatus.INTERNAL_SERVER_ERROR).json()
     })
