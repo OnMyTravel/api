@@ -20,7 +20,7 @@ function isAuthenticated (request, response, next) {
   } else {
     response.status(httpStatus.UNAUTHORIZED)
     response.setHeader('WWW-Authenticate', 'bearer')
-    response.json({})
+    response.json()
   }
 }
 

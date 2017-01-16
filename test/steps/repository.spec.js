@@ -152,5 +152,47 @@ describe('Step', () => {
           })
       })
     })
+
+    describe(':updateByTripIdAndStepId', () => {
+      let step, tripId
+      before((done) => {
+        tripId = Mongoose.Types.ObjectId()
+        Step
+          .create({ message: 'My new trip', trip_id: tripId })
+          .then((createdStep) => {
+            step = createdStep
+            done()
+          })
+      })
+
+      it('checks sanity', () => {
+        repository.should.have.property('updateByTripIdAndStepId')
+      })
+
+      it('should partially update the document', (done) => {
+        repository
+          .updateByTripIdAndStepId(tripId, step._id, { message: 'NEW MESSAGE FOR STEP' })
+          .then((data) => {
+            Step
+              .findById(step._id)
+              .then((step) => {
+                step.message.should.equal('NEW MESSAGE FOR STEP')
+                done()
+              })
+          }, (er) => {
+            done(new Error('Should not fail with an OK payload'))
+          })
+      })
+
+      it('should return an error when payload is wrong', (done) => {
+        repository
+          .updateByTripIdAndStepId(tripId, step._id, { trip_id: null })
+          .then((data) => {
+            done(new Error('Should not succeed with a name null'))
+          }, () => {
+            done()
+          })
+      })
+    })
   })
 })

@@ -251,5 +251,152 @@ describe('Steps', () => {
         })
       })
     })
+
+    describe(':updateOne', () => {
+      let userId, trip, step, token
+
+      before((done) => {
+        userId = mongoose.Types.ObjectId()
+        token = shared.tokens.create(userId, '')
+        Trip.create({
+          name: Faker.lorem.sentence(10),
+          owner_id: userId.toString()
+        }).then((createdTrip) => {
+          trip = createdTrip
+
+          Step
+            .create({ message: Faker.lorem.sentence(10), trip_id: createdTrip._id })
+            .then((createdStep) => {
+              step = createdStep
+              done()
+            })
+        }, (e) => {
+          done(e)
+        })
+      })
+
+      describe('when the client is not authenticated', () => {
+        it('should return UNAUTHORIZED', (done) => {
+          chai.request(app)
+            .put('/trips/' + trip._id + '/steps/' + step._id)
+            .end((e, res) => {
+              res.should.have.status(401)
+              done()
+            })
+        })
+      })
+
+      describe('when the client is authenticated', () => {
+        describe('and the trip does not exist', () => {
+          it('shoud return NOT_FOUND', (done) => {
+            chai.request(app)
+              .put('/trips/' + mongoose.Types.ObjectId().toString() + '/steps/' + mongoose.Types.ObjectId().toString())
+              .set('Authorization', 'Bearer ' + token)
+              .end((e, res) => {
+                res.should.have.status(404)
+                done()
+              })
+          })
+        })
+
+        describe('and the trip exists', () => {
+          describe('but the client is not allowed to edit it', () => {
+            it('shoud return FORBIDDEN', (done) => {
+              let token = shared.tokens.create(mongoose.Types.ObjectId().toString(), '')
+
+              chai.request(app)
+                .put('/trips/' + trip._id + '/steps/' + mongoose.Types.ObjectId().toString())
+                .set('Authorization', 'Bearer ' + token)
+                .end((e, res) => {
+                  res.should.have.status(403)
+                  done()
+                })
+            })
+          })
+
+          describe('and the step does not exists', () => {
+            it('shoud return NOT_FOUND', (done) => {
+              chai.request(app)
+                .put('/trips/' + trip._id + '/steps/' + mongoose.Types.ObjectId().toString())
+                .set('Authorization', 'Bearer ' + token)
+                .end((e, res) => {
+                  res.should.have.status(404)
+                  done()
+                })
+            })
+          })
+
+          describe('and the step exists', () => {
+            describe('but it is related to another trip', () => {
+              let step
+
+              before((done) => {
+                Step
+                  .create({ message: Faker.lorem.sentence(10), trip_id: mongoose.Types.ObjectId().toString() })
+                  .then((createdStep) => {
+                    step = createdStep
+                    done()
+                  })
+              })
+
+              it('should return 404', (done) => {
+                chai.request(app)
+                  .put('/trips/' + trip._id + '/steps/' + step._id)
+                  .set('Authorization', 'Bearer ' + token)
+                  .end((e, res) => {
+                    res.should.have.status(404)
+                    done()
+                  })
+              })
+            })
+          })
+
+          it('should return OK', (done) => {
+            chai.request(app)
+              .put('/trips/' + trip._id + '/steps/' + step._id)
+              .send({ message: 'A super message', image: { caption: 'MY CAPTION' } })
+              .set('Authorization', 'Bearer ' + token)
+              .end((e, res) => {
+                res.should.have.status(200)
+                res.body.message.should.equal('A super message')
+                res.body.image.caption.should.equal('MY CAPTION')
+
+                Step
+                  .findById(step._id)
+                  .then((step) => {
+                    step.message.should.equal('A super message')
+                    step.image.caption.should.equal('MY CAPTION')
+                    step.trip_id.toString().should.equal(trip._id.toString())
+
+                    done()
+                  })
+              })
+          })
+
+          it('should not update the trip_id, even if it is asked', (done) => {
+            let newTripId = mongoose.Types.ObjectId()
+            let message = Faker.lorem.sentence(10)
+
+            chai.request(app)
+              .put('/trips/' + trip._id + '/steps/' + step._id)
+              .send({ trip_id: newTripId.toString(), message })
+              .set('Authorization', 'Bearer ' + token)
+              .end((e, res) => {
+                res.should.have.status(200)
+                res.body.message.should.equal(message)
+
+                Step
+                  .findById(step._id)
+                  .then((step) => {
+                    step.message.should.equal(message)
+                    step.trip_id.toString().should.equal(trip._id.toString())
+
+                    done()
+                  })
+              })
+          })
+        })
+      })
+    })
   })
 })
