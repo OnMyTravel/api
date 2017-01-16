@@ -30,4 +30,14 @@ function deleteOne (req, res) {
     })
 }
 
-module.exports = { get, create, deleteOne }
+function updateOne (req, res) {
+  req.body.trip_id = req.params.tripid
+
+  repository
+    .updateByTripIdAndStepId(req.params.tripid, req.params.stepid, req.body)
+    .then(() => {
+      res.json(req.body)
+    })
+}
+
+module.exports = { get, create, deleteOne, updateOne }
