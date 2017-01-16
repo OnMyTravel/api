@@ -20,4 +20,8 @@ function updateByTripIdAndStepId (trip_id, step_id, model) {
   return Step.update({ _id: step_id, trip_id }, { $set: model }, {runValidators: true})
 }
 
-module.exports = { create, findByTripId, findByTripIdAndStepId, updateByTripIdAndStepId, deleteById }
+function deleteByTripId (trip_id) {
+  return Step.remove({ trip_id })
+}
+
+module.exports = { create, findByTripId, findByTripIdAndStepId, updateByTripIdAndStepId, deleteById, deleteByTripId }

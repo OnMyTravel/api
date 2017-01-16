@@ -194,5 +194,47 @@ describe('Step', () => {
           })
       })
     })
+
+    describe(':deleteByTripId', () => {
+      let targetedTrip
+      beforeEach((done) => {
+        targetedTrip = Mongoose.Types.ObjectId()
+        let otherTrip = Mongoose.Types.ObjectId()
+        Step
+          .create([
+            { message: 'TRIP ONE - FIRST STEP', trip_id: targetedTrip },
+            { message: 'TRIP ONE - SECOND STEP', trip_id: targetedTrip },
+            { message: 'TRIP TWO', trip_id: otherTrip },
+            { message: 'TRIP ONE - THIRD STEP', trip_id: targetedTrip }
+          ])
+          .then((createdStep) => {
+            done()
+          })
+      })
+
+      afterEach(() => {
+        Step.remove({}).exec()
+      })
+
+      it('checks sanity', () => {
+        repository.should.have.property('deleteByTripId')
+        repository.deleteByTripId.should.be.a('function')
+      })
+
+      it('should remove the selected step', (done) => {
+        repository
+          .deleteByTripId(targetedTrip)
+          .then(() => {
+            Step
+              .find({})
+              .then((steps) => {
+                steps.should.have.length(1)
+                steps[0].message.should.equal('TRIP TWO')
+
+                done()
+              })
+          })
+      })
+    })
   })
 })

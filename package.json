@@ -13,7 +13,8 @@
       "it",
       "beforeEach",
       "before",
-      "after"
+      "after",
+      "afterEach"
     ]
   },
   "repository": {

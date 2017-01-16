@@ -3,6 +3,7 @@ const config = require('config')
 const app = require(config.get('app-root') + '/index')
 const Faker = require('faker')
 const Trip = require(config.get('app-folder') + '/trips/model')
+const Step = require(config.get('app-folder') + '/steps/model')
 const shared = require(config.get('app-folder') + '/shared')
 
 const chai = require('chai')
@@ -342,6 +343,16 @@ describe('Trips', function () {
         })
 
         describe('when the user is allowed to delete the trip', () => {
+          let steps
+          before((done) => {
+            Step
+              .create([{ message: 'STEP 1', trip_id: trip._id }, { message: 'STEP 2', trip_id: trip._id }])
+              .then((createdSteps) => {
+                steps = createdSteps
+                done()
+              })
+          })
+
           it('should return an OK status code', (done) => {
             chai.request(app)
               .delete('/trips/' + trip._id)
@@ -353,6 +364,24 @@ describe('Trips', function () {
                   .then((trip) => {
                     if (trip) {
                       done(new Error('We should not find the trip again'))
+                    } else {
+                      done()
+                    }
+                  })
+              })
+          })
+
+          it('should also remove steps', (done) => {
+            chai.request(app)
+              .delete('/trips/' + trip._id)
+              .set('Authorization', 'Bearer ' + token)
+              .end((e, res) => {
+                res.should.have.status(200)
+                Step
+                  .find({ trip_id: trip._id })
+                  .then((steps) => {
+                    if (steps.length > 0) {
+                      done(new Error('We should not find the steps again'))
                     } else {
                       done()
                     }
