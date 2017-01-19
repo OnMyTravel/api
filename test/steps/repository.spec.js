@@ -5,7 +5,7 @@ chai.should()
 chai.use(require('sinon-chai'))
 
 const config = require('config')
-const Step = require(config.get('app-folder') + '/steps/model')
+const Step = require(config.get('app-folder') + '/steps/models/step')
 const repository = require(config.get('app-folder') + '/steps/repository')
 
 describe('Step', () => {

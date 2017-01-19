@@ -6,7 +6,8 @@ let StepSchema = new Schema(
     message: String,
     image: {
       source: String,
-      caption: String
+      caption: String,
+      size: Number
     },
     location: {
       label: String,

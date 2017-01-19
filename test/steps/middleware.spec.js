@@ -3,7 +3,7 @@ const sinon     = require('sinon')
 const mongoose  = require('mongoose')
 const Faker     = require('faker')
 const httpMocks = require('node-mocks-http')
-const Step      = require(config.get('app-folder') + '/steps/model')
+const Step      = require(config.get('app-folder') + '/steps/models/step')
 
 const tripMiddleware = require(config.get('app-folder') + '/steps/middleware')
 

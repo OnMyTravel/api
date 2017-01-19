@@ -2,10 +2,11 @@
 const config = require('config')
 const app = require(config.get('app-root') + '/index')
 const Trip = require(config.get('app-folder') + '/trips/model')
-const Step = require(config.get('app-folder') + '/steps/model')
+const Step = require(config.get('app-folder') + '/steps/models/step')
 const Faker = require('faker')
 const mongoose = require('mongoose')
 const shared = require(config.get('app-folder') + '/shared')
+const fs = require('fs')
 
 const chai = require('chai')
 const chaiHttp = require('chai-http')

@@ -1,4 +1,4 @@
-const Step = require('./model')
+const Step = require('./models/step')
 
 function create (model) {
   return new Step(model).save()
