@@ -24,4 +24,13 @@ function deleteByTripId (trip_id) {
   return Step.remove({ trip_id })
 }
 
-module.exports = { create, findByTripId, findByTripIdAndStepId, updateByTripIdAndStepId, deleteById, deleteByTripId }
+function addImageToGallery (step_id, imageModel) {
+  return Step
+    .findOne({ _id: step_id })
+    .then((step) => {
+      step.gallery.push(imageModel)
+      return step.save()
+    })
+}
+
+module.exports = { create, findByTripId, findByTripIdAndStepId, updateByTripIdAndStepId, deleteById, deleteByTripId, addImageToGallery }
