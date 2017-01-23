@@ -239,14 +239,45 @@ describe('Steps', () => {
           it('should create the steps', (done) => {
             chai.request(app)
               .post('/trips/' + trip._id + '/steps')
-              .send({ message: 'A super message', image: { caption: 'MY CAPTION' } })
+              .send({ message: 'A super message' })
               .set('Authorization', 'Bearer ' + token)
               .end((e, res) => {
                 res.should.have.status(200)
                 res.body.message.should.equal('A super message')
-                res.body.image.caption.should.equal('MY CAPTION')
                 res.body.trip_id.should.equal(trip._id.toString())
-                done()
+
+                Step
+                  .findById(res.body._id)
+                  .then((step) => {
+                    step._id.toString().should.equal(res.body._id)
+                    step.message.should.equal('A super message')
+                    step.trip_id.toString().should.equal(trip._id.toString())
+
+                    done()
+                  })
+              })
+          })
+
+          it('should not set an image on the initial creation', (done) => {
+            chai.request(app)
+              .post('/trips/' + trip._id + '/steps')
+              .send({ message: 'A super message', gallery: [{ source: 'MY SOURCE' }] })
+              .set('Authorization', 'Bearer ' + token)
+              .end((e, res) => {
+                res.should.have.status(200)
+                res.body.message.should.equal('A super message')
+                res.body.trip_id.should.equal(trip._id.toString())
+
+                Step
+                  .findById(res.body._id)
+                  .then((step) => {
+                    step._id.toString().should.equal(res.body._id)
+                    step.message.should.equal('A super message')
+                    step.gallery.should.have.length(0)
+                    step.trip_id.toString().should.equal(trip._id.toString())
+
+                    done()
+                  })
               })
           })
         })
@@ -399,7 +430,11 @@ describe('Steps', () => {
           trip = createdTrip
 
           Step
-            .create({ message: Faker.lorem.sentence(10), trip_id: createdTrip._id })
+            .create({
+              message: Faker.lorem.sentence(10),
+              trip_id: createdTrip._id,
+              location: { label: Faker.lorem.sentence(10) }
+            })
             .then((createdStep) => {
               step = createdStep
               done()
@@ -488,19 +523,40 @@ describe('Steps', () => {
           it('should return OK', (done) => {
             chai.request(app)
               .put('/trips/' + trip._id + '/steps/' + step._id)
-              .send({ message: 'A super message', image: { caption: 'MY CAPTION' } })
+              .send({ message: 'A super message' })
               .set('Authorization', 'Bearer ' + token)
               .end((e, res) => {
                 res.should.have.status(200)
                 res.body.message.should.equal('A super message')
-                res.body.image.caption.should.equal('MY CAPTION')
 
                 Step
                   .findById(step._id)
                   .then((step) => {
                     step.message.should.equal('A super message')
-                    step.image.caption.should.equal('MY CAPTION')
                     step.trip_id.toString().should.equal(trip._id.toString())
+
+                    done()
+                  })
+              })
+          })
+
+          it('should should not update the gallery', (done) => {
+            chai.request(app)
+              .put('/trips/' + trip._id + '/steps/' + step._id)
+              .send({ message: 'A super message', gallery: [{ source: 'src:myimage.jpg' }] })
+              .set('Authorization', 'Bearer ' + token)
+              .end((e, res) => {
+                res.should.have.status(200)
+                res.body.message.should.equal('A super message')
+                res.body.gallery.should.have.length(0)
+                res.body.location.label.should.equal(step.location.label)
+
+                Step
+                  .findById(step._id)
+                  .then((step) => {
+                    step.message.should.equal('A super message')
+                    step.trip_id.toString().should.equal(trip._id.toString())
+                    step.gallery.should.have.length(0)
 
                     done()
                   })
