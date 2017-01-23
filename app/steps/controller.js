@@ -13,6 +13,8 @@ function create (req, res) {
   let stepPayload = req.body
   stepPayload.trip_id = req.params.tripid
 
+  stepPayload.gallery = []
+
   return repository
     .create(stepPayload)
     .then((step) => {

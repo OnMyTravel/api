@@ -257,6 +257,29 @@ describe('Steps', () => {
                   })
               })
           })
+
+          it('should not set an image on the initial creation', (done) => {
+            chai.request(app)
+              .post('/trips/' + trip._id + '/steps')
+              .send({ message: 'A super message', gallery: [{ source: 'MY SOURCE' }] })
+              .set('Authorization', 'Bearer ' + token)
+              .end((e, res) => {
+                res.should.have.status(200)
+                res.body.message.should.equal('A super message')
+                res.body.trip_id.should.equal(trip._id.toString())
+
+                Step
+                  .findById(res.body._id)
+                  .then((step) => {
+                    step._id.toString().should.equal(res.body._id)
+                    step.message.should.equal('A super message')
+                    step.gallery.should.have.length(0)
+                    step.trip_id.toString().should.equal(trip._id.toString())
+
+                    done()
+                  })
+              })
+          })
         })
       })
     })
