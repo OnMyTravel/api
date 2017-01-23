@@ -239,14 +239,22 @@ describe('Steps', () => {
           it('should create the steps', (done) => {
             chai.request(app)
               .post('/trips/' + trip._id + '/steps')
-              .send({ message: 'A super message', image: { caption: 'MY CAPTION' } })
+              .send({ message: 'A super message' })
               .set('Authorization', 'Bearer ' + token)
               .end((e, res) => {
                 res.should.have.status(200)
                 res.body.message.should.equal('A super message')
-                res.body.image.caption.should.equal('MY CAPTION')
                 res.body.trip_id.should.equal(trip._id.toString())
-                done()
+
+                Step
+                  .findById(res.body._id)
+                  .then((step) => {
+                    step._id.toString().should.equal(res.body._id)
+                    step.message.should.equal('A super message')
+                    step.trip_id.toString().should.equal(trip._id.toString())
+
+                    done()
+                  })
               })
           })
         })
@@ -488,18 +496,16 @@ describe('Steps', () => {
           it('should return OK', (done) => {
             chai.request(app)
               .put('/trips/' + trip._id + '/steps/' + step._id)
-              .send({ message: 'A super message', image: { caption: 'MY CAPTION' } })
+              .send({ message: 'A super message' })
               .set('Authorization', 'Bearer ' + token)
               .end((e, res) => {
                 res.should.have.status(200)
                 res.body.message.should.equal('A super message')
-                res.body.image.caption.should.equal('MY CAPTION')
 
                 Step
                   .findById(step._id)
                   .then((step) => {
                     step.message.should.equal('A super message')
-                    step.image.caption.should.equal('MY CAPTION')
                     step.trip_id.toString().should.equal(trip._id.toString())
 
                     done()

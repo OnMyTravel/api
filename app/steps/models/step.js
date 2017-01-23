@@ -7,11 +7,6 @@ let StepSchema = new Schema(
   {
     message: String,
     gallery: [ImageSchema.schema],
-    image: {
-      source: String,
-      caption: String,
-      size: Number
-    },
     location: {
       label: String,
       coordinates: {
