@@ -253,6 +253,139 @@ describe('Steps', () => {
       })
     })
 
+    describe(':attach', () => {
+      describe('when the user is not authenticated', () => {
+        it('should return UNAUTHORIZED', (done) => {
+          chai.request(app)
+            .post('/trips/' + mongoose.Types.ObjectId() + '/steps/' + mongoose.Types.ObjectId() + '/attach')
+            .end((e, res) => {
+              res.should.have.status(401)
+              done()
+            })
+        })
+      })
+
+      describe('when the trip does not exists', () => {
+        let token
+        before(() => {
+          token = shared.tokens.create(mongoose.Types.ObjectId().toString(), '')
+        })
+
+        it('should return NOT_FOUND', (done) => {
+          chai.request(app)
+            .post('/trips/' + mongoose.Types.ObjectId() + '/steps/' + mongoose.Types.ObjectId() + '/attach')
+            .set('Authorization', 'Bearer ' + token)
+            .end((e, res) => {
+              res.should.have.status(404)
+              done()
+            })
+        })
+      })
+
+      describe('when the trip exists', () => {
+        let userId, trip
+        before((done) => {
+          userId = mongoose.Types.ObjectId()
+          Trip.create({
+            name: Faker.lorem.sentence(10),
+            owner_id: userId.toString()
+          }).then((createdTrip) => {
+            trip = createdTrip
+            done()
+          }, (error) => {
+            done(error)
+          })
+        })
+
+        describe('but is not editable', () => {
+          it('should return FORBIDDEN', (done) => {
+            let token = shared.tokens.create(mongoose.Types.ObjectId().toString(), '')
+
+            chai.request(app)
+              .post('/trips/' + trip._id + '/steps/' + mongoose.Types.ObjectId() + '/attach')
+              .set('Authorization', 'Bearer ' + token)
+              .end((e, res) => {
+                res.should.have.status(403)
+                done()
+              })
+          })
+        })
+
+        describe('and it is editable', () => {
+          let token
+          before(() => {
+            token = shared.tokens.create(userId.toString(), '')
+          })
+
+          describe('but the step does not exist', () => {
+            it('should return NOT FOUND', (done) => {
+              chai.request(app)
+                .post('/trips/' + trip._id + '/steps/' + mongoose.Types.ObjectId() + '/attach')
+                .set('Authorization', 'Bearer ' + token)
+                .end((e, res) => {
+                  res.should.have.status(404)
+                  done()
+                })
+            })
+          })
+
+          describe('and the step exists', () => {
+            let step
+            beforeEach((done) => {
+              Step
+                .create({ message: Faker.lorem.sentence(10), trip_id: trip._id })
+                .then((createdStep) => {
+                  step = createdStep
+                  done()
+                })
+            })
+
+            it('requires an image to be sent', (done) => {
+              chai.request(app)
+                .post('/trips/' + trip._id + '/steps/' + step._id + '/attach')
+                .set('Authorization', 'Bearer ' + token)
+                .end((e, res) => {
+                  res.should.have.status(400)
+                  done()
+                })
+            })
+
+            it('should attach an image to the step', (done) => {
+              chai.request(app)
+                .post('/trips/' + trip._id + '/steps/' + step._id + '/attach')
+                .attach('picture', fs.readFileSync('./test/steps/kitten.jpg'), 'kitten.jpg')
+                .field('caption', 'an awesome kitten')
+                .set('Authorization', 'Bearer ' + token)
+                .end((e, res) => {
+                  res.should.have.status(200)
+                  res.body.gallery.should.have.length(1)
+                  let firstImage = res.body.gallery[0]
+                  firstImage.caption.should.equal('an awesome kitten')
+
+                  fs.access('./uploads/' + firstImage.source, fs.constants.R_OK, (err) => {
+                    done(err)
+                  })
+                })
+            })
+
+            it('should return the step', (done) => {
+              chai.request(app)
+                .post('/trips/' + trip._id + '/steps/' + step._id + '/attach')
+                .attach('picture', fs.readFileSync('./test/steps/kitten.jpg'), 'kitten.jpg')
+                .field('caption', 'an awesome kitten')
+                .set('Authorization', 'Bearer ' + token)
+                .end((e, res) => {
+                  res.should.have.status(200)
+                  res.body.gallery.should.have.length(1)
+                  res.body.message.should.equal(step.message)
+                  done()
+                })
+            })
+          })
+        })
+      })
+    })
+
     describe(':updateOne', () => {
       let userId, trip, step, token
 

@@ -30,6 +30,24 @@ function deleteOne (req, res) {
     })
 }
 
+function attach (req, res) {
+  if (req.file) {
+    let image = {
+      source: req.file.filename,
+      caption: req.body.caption,
+      size: req.file.size
+    }
+
+    repository
+      .addImageToGallery(req.params.stepid, image)
+      .then((step) => {
+        res.status(statusCode.OK).json(step)
+      })
+  } else {
+    res.status(statusCode.BAD_REQUEST).json()
+  }
+}
+
 function updateOne (req, res) {
   req.body.trip_id = req.params.tripid
 
@@ -40,4 +58,4 @@ function updateOne (req, res) {
     })
 }
 
-module.exports = { get, create, deleteOne, updateOne }
+module.exports = { get, create, deleteOne, updateOne, attach }
