@@ -1,14 +1,15 @@
-var nock = require('nock')
-let app = require(require('config').get('app-root') + '/index')
-let User = require(require('config').get('app-folder') + '/users/model')
-let facebookResponses = require('./facebook.errors')
-let httpStatus = require('http-status-codes')
-let config = require('config')
-let chai = require('chai')
-let chaiHttp = require('chai-http')
+const nock = require('nock')
+const faker = require('faker')
+const config = require('config')
+const facebookResponses = require('./facebook.errors')
+const app = require(config.get('app-root') + '/index')
+const User = require(config.get('app-folder') + '/users/model')
 
-let jsonwebtoken = require('jsonwebtoken')
+const httpStatus = require('http-status-codes')
+const jsonwebtoken = require('jsonwebtoken')
 
+const chai = require('chai')
+const chaiHttp = require('chai-http')
 chai.should()
 chai.use(chaiHttp)
 
@@ -53,15 +54,16 @@ describe('Users', () => {
     })
 
     describe('when the account already exists', () => {
-      let user
+      let user, userData
 
       beforeEach((done) => {
         User.remove({}).exec()
-        user = new User({
-          name: 'Adrien Saunier',
-          email: 'contact.adriensaunier@gmail.com',
-          id_facebook: '1168196352'
-        })
+        userData = {
+          name: faker.name.findName(),
+          email: faker.internet.email(),
+          id_facebook: '1234567891'
+        }
+        user = new User(userData)
 
         user.save(() => {
           done()
@@ -88,7 +90,7 @@ describe('Users', () => {
     describe('when the facebook ID is not registered', () => {
       beforeEach(() => {
         mockHttpAnswser(facebookResponses.OK, ALLOWEDTOKEN)
-        User.remove({ id_facebook: '1168196352' }).exec()
+        User.remove({ id_facebook: '1234567891' }).exec()
       })
 
       it('should return CREATED', (done) => {
@@ -102,11 +104,11 @@ describe('Users', () => {
             var decodedToken = jsonwebtoken.verify(res.body.token, config.get('app-secret'))
             decodedToken.should.have.property('facebook_access_token', ALLOWEDTOKEN)
 
-            User.findOne({ id_facebook: '1168196352' })
+            User.findOne({ id_facebook: '1234567891' })
               .then((foundUser) => {
-                foundUser.name.should.equal('Adrien Saunier')
-                foundUser.id_facebook.should.equal('1168196352')
-                foundUser.email.should.equal('contact.adriensaunier@gmail.com')
+                foundUser.name.should.equal('On My Travel Support')
+                foundUser.id_facebook.should.equal('1234567891')
+                foundUser.email.should.equal('contact.onmy@travel.com')
 
                 done()
               })
