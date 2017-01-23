@@ -3,7 +3,7 @@ const config = require('config')
 const app = require(config.get('app-root') + '/index')
 const Faker = require('faker')
 const Trip = require(config.get('app-folder') + '/trips/model')
-const Step = require(config.get('app-folder') + '/steps/model')
+const Step = require(config.get('app-folder') + '/steps/models/step')
 const shared = require(config.get('app-folder') + '/shared')
 
 const chai = require('chai')

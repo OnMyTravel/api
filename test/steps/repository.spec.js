@@ -5,7 +5,7 @@ chai.should()
 chai.use(require('sinon-chai'))
 
 const config = require('config')
-const Step = require(config.get('app-folder') + '/steps/model')
+const Step = require(config.get('app-folder') + '/steps/models/step')
 const repository = require(config.get('app-folder') + '/steps/repository')
 
 describe('Step', () => {
@@ -233,6 +233,46 @@ describe('Step', () => {
 
                 done()
               })
+          })
+      })
+    })
+
+    describe(':addImageToGallery', () => {
+      let step, tripId
+      before((done) => {
+        tripId = Mongoose.Types.ObjectId()
+        Step
+          .create({ message: 'My new trip', trip_id: tripId })
+          .then((createdStep) => {
+            step = createdStep
+            done()
+          })
+      })
+
+      it('checks sanity', () => {
+        repository.should.have.property('addImageToGallery')
+      })
+
+      it('should append an image to step model', (done) => {
+        repository
+          .addImageToGallery(step._id, { caption: 'An adorable kitten image', size: 9646, source: 'uploads/imagename' })
+          .then(() => {
+            Step
+              .findById(step._id)
+              .then((step) => {
+                step.gallery.should.have.length(1)
+                done()
+              })
+          })
+      })
+
+      it('should raise an error when the requirements are not fullfilled', (done) => {
+        repository
+          .addImageToGallery(step._id, { caption: 'An adorable kitten image', size: 9646 })
+          .then(() => {
+            done(new Error('should not be considered as valid'))
+          }, (err) => {
+            done()
           })
       })
     })

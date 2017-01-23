@@ -1,12 +1,16 @@
 let mongoose = require('mongoose')
 let Schema = mongoose.Schema
 
+const ImageSchema = require('./image')
+
 let StepSchema = new Schema(
   {
     message: String,
+    gallery: [ImageSchema.schema],
     image: {
       source: String,
-      caption: String
+      caption: String,
+      size: Number
     },
     location: {
       label: String,

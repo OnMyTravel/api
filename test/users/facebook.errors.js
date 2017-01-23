@@ -15,9 +15,9 @@ const UNAUTHORIZED = {
 
 const OK = {
   'body': JSON.stringify({
-    'id': '1168196352',
-    'name': 'Adrien Saunier',
-    'email': 'contact.adriensaunier@gmail.com'
+    'id': '1234567891',
+    'name': 'On My Travel Support',
+    'email': 'contact.onmy@travel.com'
   }),
   'status': 200
 }
