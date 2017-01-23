@@ -51,12 +51,14 @@ function attach (req, res) {
 }
 
 function updateOne (req, res) {
-  req.body.trip_id = req.params.tripid
+  let stepChanges = req.body
+  stepChanges.trip_id = req.params.tripid
+  delete stepChanges.gallery
 
   repository
-    .updateByTripIdAndStepId(req.params.tripid, req.params.stepid, req.body)
-    .then(() => {
-      res.json(req.body)
+    .updateByTripIdAndStepId(req.params.tripid, req.params.stepid, stepChanges)
+    .then((step) => {
+      res.json(step)
     })
 }
 

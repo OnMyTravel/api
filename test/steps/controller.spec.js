@@ -430,7 +430,11 @@ describe('Steps', () => {
           trip = createdTrip
 
           Step
-            .create({ message: Faker.lorem.sentence(10), trip_id: createdTrip._id })
+            .create({
+              message: Faker.lorem.sentence(10),
+              trip_id: createdTrip._id,
+              location: { label: Faker.lorem.sentence(10) }
+            })
             .then((createdStep) => {
               step = createdStep
               done()
@@ -530,6 +534,29 @@ describe('Steps', () => {
                   .then((step) => {
                     step.message.should.equal('A super message')
                     step.trip_id.toString().should.equal(trip._id.toString())
+
+                    done()
+                  })
+              })
+          })
+
+          it('should should not update the gallery', (done) => {
+            chai.request(app)
+              .put('/trips/' + trip._id + '/steps/' + step._id)
+              .send({ message: 'A super message', gallery: [{ source: 'src:myimage.jpg' }] })
+              .set('Authorization', 'Bearer ' + token)
+              .end((e, res) => {
+                res.should.have.status(200)
+                res.body.message.should.equal('A super message')
+                res.body.gallery.should.have.length(0)
+                res.body.location.label.should.equal(step.location.label)
+
+                Step
+                  .findById(step._id)
+                  .then((step) => {
+                    step.message.should.equal('A super message')
+                    step.trip_id.toString().should.equal(trip._id.toString())
+                    step.gallery.should.have.length(0)
 
                     done()
                   })

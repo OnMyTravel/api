@@ -17,7 +17,7 @@ function deleteById (id) {
 }
 
 function updateByTripIdAndStepId (trip_id, step_id, model) {
-  return Step.update({ _id: step_id, trip_id }, { $set: model }, {runValidators: true})
+  return Step.findByIdAndUpdate(step_id, { $set: model }, {runValidators: true, new: true})
 }
 
 function deleteByTripId (trip_id) {

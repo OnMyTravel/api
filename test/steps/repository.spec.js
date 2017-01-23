@@ -187,6 +187,18 @@ describe('Step', () => {
             done()
           })
       })
+
+      it('should return the updated step', (done) => {
+        repository
+          .updateByTripIdAndStepId(null, step._id, { message: 'A SUPER NEW MESSAGE' })
+          .then((step, test) => {
+            console.log(step, test)
+            step.message.should.equal('A SUPER NEW MESSAGE')
+            done()
+          }, () => {
+            done(new Error('Should not end in error'))
+          })
+      })
     })
 
     describe(':deleteByTripId', () => {
