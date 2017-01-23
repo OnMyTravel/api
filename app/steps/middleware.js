@@ -13,4 +13,12 @@ function exists (req, res, next) {
     })
 }
 
-module.exports = { exists }
+function handleUploadError (err, req, res, next) {
+  if (err) {
+    res.status(statusCode.INTERNAL_SERVER_ERROR).json(err)
+  } else {
+    next()
+  }
+}
+
+module.exports = { exists, handleUploadError }
