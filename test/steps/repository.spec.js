@@ -237,7 +237,7 @@ describe('Step', () => {
       })
     })
 
-    describe.only(':addImageToGallery', () => {
+    describe(':addImageToGallery', () => {
       let step, tripId
       before((done) => {
         tripId = Mongoose.Types.ObjectId()
