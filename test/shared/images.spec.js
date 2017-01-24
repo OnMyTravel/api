@@ -28,7 +28,7 @@ describe('shared', () => {
 
       it('should return GPS coordinates', (done) => {
         shared.images
-          .getCoordinates('./test/shared/star.jpg')
+          .getCoordinates('./test/shared/starWithGPS.jpg')
           .then((coordinates) => {
             coordinates.should.have.property('GPSLatitudeRef')
             coordinates.should.have.property('GPSLatitude')

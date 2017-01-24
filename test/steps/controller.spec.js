@@ -434,7 +434,7 @@ describe('Steps', () => {
             it('should attach the image with GPS informations', (done) => {
               chai.request(app)
                 .post('/trips/' + trip._id + '/steps/' + step._id + '/attach')
-                .attach('picture', fs.readFileSync('./test/steps/star.jpg'), 'kitten.jpg')
+                .attach('picture', fs.readFileSync('./test/steps/starWithGPS.jpg'), 'kitten.jpg')
                 .field('caption', 'an awesome kitten')
                 .set('Authorization', 'Bearer ' + token)
                 .end((e, res) => {
