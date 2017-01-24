@@ -412,6 +412,47 @@ describe('Steps', () => {
                   done()
                 })
             })
+
+            it('should return the step, without GPS data', (done) => {
+              chai.request(app)
+                .post('/trips/' + trip._id + '/steps/' + step._id + '/attach')
+                .attach('picture', fs.readFileSync('./test/steps/starWithoutGPS.jpg'), 'kitten.jpg')
+                .field('caption', 'an awesome kitten')
+                .set('Authorization', 'Bearer ' + token)
+                .end((e, res) => {
+                  res.should.have.status(200)
+                  res.body.message.should.equal(step.message)
+                  res.body.gallery.should.have.length(1)
+                  let image = res.body.gallery[0]
+                  image.gps.GPSLongitude.should.have.length(0)
+                  image.gps.GPSLatitude.should.have.length(0)
+
+                  done()
+                })
+            })
+
+            it('should attach the image with GPS informations', (done) => {
+              chai.request(app)
+                .post('/trips/' + trip._id + '/steps/' + step._id + '/attach')
+                .attach('picture', fs.readFileSync('./test/steps/star.jpg'), 'kitten.jpg')
+                .field('caption', 'an awesome kitten')
+                .set('Authorization', 'Bearer ' + token)
+                .end((e, res) => {
+                  res.should.have.status(200)
+                  res.body.gallery.should.have.length(1)
+                  res.body.message.should.equal(step.message)
+
+                  let image = res.body.gallery[0]
+                  image.gps.GPSLatitudeRef.should.equal('N')
+                  image.gps.GPSLatitude.should.deep.equal([ 48, 51, 20.36 ])
+                  image.gps.GPSLongitudeRef.should.equal('E')
+                  image.gps.GPSLongitude.should.deep.equal([ 2, 16, 12.6 ])
+                  image.gps.GPSAltitudeRef.should.equal(0)
+                  image.gps.GPSAltitude.should.equal(42.93607305936073)
+
+                  done()
+                })
+            })
           })
         })
       })
