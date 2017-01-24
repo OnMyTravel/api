@@ -5,13 +5,13 @@ var router = express.Router({mergeParams: true})
 
 var middleware = require('./middleware')
 var controller = require('./controller')
-var shared = require('../shared')
+var isAuthenticated = require('../shared').isAuthenticated
 
 // Routes
 router.get('/:id', controller.getOne)
-router.get('/', shared.isAuthenticated, controller.getAll)
-router.post('/', shared.isAuthenticated, controller.create)
-router.put('/:tripid', shared.isAuthenticated, middleware.existsAndIsEditable, controller.updateOne)
-router.delete('/:tripid', shared.isAuthenticated, middleware.existsAndIsEditable, controller.deleteOne)
+router.get('/', isAuthenticated, controller.getAll)
+router.post('/', isAuthenticated, controller.create)
+router.put('/:tripid', isAuthenticated, middleware.existsAndIsEditable, controller.updateOne)
+router.delete('/:tripid', isAuthenticated, middleware.existsAndIsEditable, controller.deleteOne)
 
 module.exports = router

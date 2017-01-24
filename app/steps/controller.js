@@ -1,3 +1,4 @@
+const shared = require('../shared')
 const statusCode = require('http-status-codes')
 const repository = require('./repository')
 
@@ -40,10 +41,17 @@ function attach (req, res) {
       size: req.file.size
     }
 
-    repository
-      .addImageToGallery(req.params.stepid, image)
-      .then((step) => {
-        res.status(statusCode.OK).json(step)
+    shared.images
+      .getCoordinates(req.file.path)
+      .then((coordinates) => {
+        image.gps = coordinates
+      })
+      .then(() => {
+        repository
+          .addImageToGallery(req.params.stepid, image)
+          .then((step) => {
+            res.status(statusCode.OK).json(step)
+          })
       })
   } else {
     res.status(statusCode.BAD_REQUEST).json()

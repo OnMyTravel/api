@@ -2,6 +2,8 @@ const httpStatus = require('http-status-codes')
 const config = require('config')
 const jsonwebtoken = require('jsonwebtoken')
 
+const images = require('./images')
+
 function isAuthenticated (request, response, next) {
   if (request.headers.authorization) {
     let token = getToken(request)
@@ -52,4 +54,8 @@ function decode (token) {
   return decodedToken
 }
 
-module.exports = { isAuthenticated, tokens: { getToken, decode, create }, errors: { format } }
+module.exports = { isAuthenticated,
+  tokens: { getToken, decode, create },
+  errors: { format },
+  images
+}
