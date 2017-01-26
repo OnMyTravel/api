@@ -10,7 +10,9 @@ let mocks = {
     sign: sinon.spy()
   }
 }
-const shared = proxyquire(config.get('app-folder') + '/shared', mocks)
+
+const shared = require(config.get('app-folder') + '/shared')
+const tokens = proxyquire(config.get('app-folder') + '/shared/tokens', mocks)
 
 const chai = require('chai')
 chai.should()
@@ -35,7 +37,7 @@ describe('Shared', () => {
 
       it('should create a token that expires in 1h', () => {
         // When
-        shared.tokens.create('user_id', 'facebook_token')
+        tokens.create('user_id', 'facebook_token')
 
         // Then
         mocks.jsonwebtoken.sign
