@@ -4,5 +4,18 @@
   },
   "app-secret": "supersecret",
   "app-folder": "../../app",
-  "app-root": "../.."
+  "app-root": "../..",
+  "app": {
+    "logs": {
+      "enabled": false
+    }
+  },
+  "storage": {
+    "provider": "openstack",
+    "username": "123456789101",
+    "password": "123456789101123456789101123456789101",
+    "authUrl": "https://auth.cloud.ovh.net/",
+    "tenantId": "123456789101123456789101123456789101",
+    "region": "VALHALLA"
+  }
 }
