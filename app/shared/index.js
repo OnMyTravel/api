@@ -3,10 +3,12 @@ const config = require('config')
 const jsonwebtoken = require('jsonwebtoken')
 
 const images = require('./images')
+const tokens = require('./tokens')
+const containers = require('./containers')
 
 function isAuthenticated (request, response, next) {
   if (request.headers.authorization) {
-    let token = getToken(request)
+    let token = tokens.getToken(request)
     try {
       jsonwebtoken.verify(token, config.get('app-secret'))
       next()
@@ -37,25 +39,10 @@ function format (mongooseError) {
   return mongooseError
 }
 
-function create (user_id, facebook_token) {
-  return jsonwebtoken.sign({
-    id: user_id,
-    facebook_access_token: facebook_token
-  }, config.get('app-secret'), { expiresIn: '1h' })
-}
-
-function getToken (request) {
-  return request.headers.authorization.substring('Bearer '.length)
-}
-
-function decode (token) {
-  let decodedToken = jsonwebtoken.decode(token, config.get('app-secret'))
-  delete decodedToken.iat
-  return decodedToken
-}
-
-module.exports = { isAuthenticated,
-  tokens: { getToken, decode, create },
+module.exports = {
+  isAuthenticated,
+  tokens,
   errors: { format },
-  images
+  images,
+  containers
 }

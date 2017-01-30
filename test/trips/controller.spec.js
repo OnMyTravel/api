@@ -145,32 +145,6 @@ describe('Trips', function () {
             })
         })
       })
-
-      describe('when the payload is OK', () => {
-        it('should return CREATED status', (done) => {
-          chai.request(app)
-            .post('/trips')
-            .set('Authorization', 'Bearer ' + token)
-            .send({ name: 'Lorem ipsum' })
-            .end((e, res) => {
-              res.should.have.status(201)
-              done()
-            })
-        })
-
-        it('should return the created trip, with user as payload', (done) => {
-          chai.request(app)
-            .post('/trips')
-            .set('Authorization', 'Bearer ' + token)
-            .send({ name: 'Lorem ipsum' })
-            .end((e, res) => {
-              res.body.should.have.property('name', 'Lorem ipsum')
-              res.body.should.have.property('_id')
-              res.body.should.have.property('owner_id', userId)
-              done()
-            })
-        })
-      })
     })
 
     describe(':getOne', () => {

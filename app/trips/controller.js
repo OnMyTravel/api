@@ -10,10 +10,16 @@ function create (req, res) {
   let newTripPayload = req.body
   newTripPayload.owner_id = decodedToken.id
 
-  tripRepository
+  return tripRepository
     .create(newTripPayload)
     .then((createdTrip) => {
-      return res.status(httpStatus.CREATED).json(createdTrip)
+      shared.containers
+        .create(createdTrip._id)
+        .then(() => {
+          return res.status(httpStatus.CREATED).json(createdTrip)
+        }, () => {
+          return res.status(httpStatus.BAD_GATEWAY).json()
+        })
     }, (errors) => {
       return res.status(httpStatus.BAD_REQUEST).json(shared.errors.format(errors))
     })
