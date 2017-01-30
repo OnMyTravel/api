@@ -4,6 +4,7 @@ const jsonwebtoken = require('jsonwebtoken')
 
 const images = require('./images')
 const tokens = require('./tokens')
+const containers = require('./containers')
 
 function isAuthenticated (request, response, next) {
   if (request.headers.authorization) {
@@ -42,5 +43,6 @@ module.exports = {
   isAuthenticated,
   tokens,
   errors: { format },
-  images
+  images,
+  containers
 }
