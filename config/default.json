@@ -8,5 +8,13 @@
   },
   "database": {
       "host": "mongodb://localhost/onmytravel-dev"
+  },
+  "storage": {
+    "provider": "provider",
+    "username": "KE2QXVrk",
+    "password": "NUTRXm4MzEsNDUfGa4NUv9LA",
+    "authUrl": "https://auth.cloud.ovh.net/",
+    "tenantId": "xCE8cBPZyKCSLBjKZ8HmW8KtU7XxRyNu",
+    "region": "DxWt"
   }
 }
