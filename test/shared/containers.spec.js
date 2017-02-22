@@ -65,8 +65,7 @@ describe('Shared', () => {
         let tripId = '1234567890'
 
         // When
-        containers
-          .create(tripId)
+        containers.create(tripId)
 
         // Then
         createClientStub.should.have.been.calledWith(storageConfig)
@@ -77,8 +76,7 @@ describe('Shared', () => {
         let tripId = '1234567890'
 
         // When
-        containers
-          .create(tripId)
+        containers.create(tripId)
 
         // Then
         createContainerStub.should.have.been.calledWith({ name: tripId })
@@ -102,22 +100,21 @@ describe('Shared', () => {
         createContainerStub.should.have.been.calledWith({ name: tripId })
       })
 
-      it('should return a rejected promise with the error', (done) => {
+      it('should return a rejected promise with the error', () => {
         // Given
         let tripId = 'tripOnError'
 
         // When
-        containers
+        let promise = containers
           .create(tripId)
-          .then(() => {
-            done(new Error('Should be on error'))
-          }, (error) => {
-            error.should.deep.equal({ message: 'FAILURE' })
-            done()
-          })
 
-        // Then
-        createContainerStub.should.have.been.calledWith({ name: tripId })
+        return promise.then((container) => {
+          container.should.be.undefined
+        }, (error) => {
+          error.should.be.an.instanceof(shared.errors.classes.ContainerError)
+          error.message.should.deep.equal('FAILURE')
+          createContainerStub.should.have.been.calledWith({ name: tripId })
+        })
       })
     })
 
@@ -165,8 +162,8 @@ describe('Shared', () => {
         return promise.then(
             (file) => { file.should.be.undefined() },
             (err) => {
-              err.should.be.an('Error')
-              err.toString().should.be.equal("Error: ENOENT: no such file or directory, open 'foo.jpg'")
+              err.should.be.an.instanceof(shared.errors.classes.ContainerError)
+              err.message.should.be.equal("ENOENT: no such file or directory, open 'foo.jpg'")
             }
           )
       })
@@ -214,7 +211,8 @@ describe('Shared', () => {
           return prom.then((file) => {
             file.should.be.undefined()
           }, (err) => {
-            err.should.be.deep.equal(writableStreamError)
+            err.should.be.an.instanceof(shared.errors.classes.ContainerError)
+            err.message.should.be.equal('Unable to write the document on the output stream')
           })
         })
       })

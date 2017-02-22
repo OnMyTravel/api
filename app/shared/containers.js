@@ -1,6 +1,7 @@
-const pkgcloud = require('pkgcloud')
-const config = require('config')
 const fs = require('fs')
+const config = require('config')
+const pkgcloud = require('pkgcloud')
+const ContainerError = require('./errors').ContainerError
 
 function create (tripId) {
   let client = pkgcloud.storage.createClient(config.get('storage'))
@@ -8,7 +9,7 @@ function create (tripId) {
   return new Promise((resolve, reject) => {
     client.createContainer({ name: tripId }, (error, container) => {
       if (error) {
-        reject(error)
+        reject(new ContainerError(error.message))
       } else {
         resolve(container)
       }
@@ -28,11 +29,11 @@ function uploadToStorage (file, tripId) {
     })
 
     readStream.on('error', (err) => {
-      reject(err)
+      reject(new ContainerError(err.message))
     })
 
     writeStream.on('error', (err) => {
-      reject(err)
+      reject(new ContainerError(err.message))
     })
 
     writeStream.on('success', (file) => {
