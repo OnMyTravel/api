@@ -5,6 +5,7 @@ const jsonwebtoken = require('jsonwebtoken')
 const images = require('./images')
 const tokens = require('./tokens')
 const containers = require('./containers')
+const classErrors = require('./errors')
 
 function isAuthenticated (request, response, next) {
   if (request.headers.authorization) {
@@ -42,7 +43,7 @@ function format (mongooseError) {
 module.exports = {
   isAuthenticated,
   tokens,
-  errors: { format },
+  errors: { format, classes: classErrors },
   images,
   containers
 }

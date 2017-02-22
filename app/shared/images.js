@@ -1,11 +1,12 @@
 const ExifImage = require('exif')
+const GPSError = require('./errors').GPSError
 
 function getCoordinates (filePath) {
   return new Promise((resolve, reject) => {
     try {
       ExifImage({ image: filePath }, function (error, exifData) {
         if (error) {
-          reject(error)
+          reject(new GPSError(error.message))
         } else {
           let coordinates = {}
 
