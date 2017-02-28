@@ -1,53 +1,7 @@
-// 'use strict';
-//
-// import fs from 'fs';
-// import pkgcloud from 'pkgcloud';
-// import config from '../../config/environment';
-// import Q from 'q';
-//
-// export function createSession() {
-//   var storageClient = pkgcloud.storage.createClient(config.storage);
-//
-//   return {
-//     getTripFolder: function (tripId) {
-//       var deferred = Q.defer();
-//
-//       storageClient.getContainer(tripId, function (err, data) {
-//           (err) ? deferred.reject(err) : deferred.resolve(data);
-//       });
-//
-//       return deferred.promise;
-//     },
-//
-//     uploadToStorage: function (tripId, filePath, remoteFilename, mimetype) {
-//       var uploadPromise = Q.defer();
-//
-//       var readStream = fs.createReadStream(filePath);
-//       var writeStream = storageClient.upload({
-//         container: tripId,
-//         remote: remoteFilename,
-//         contentType: mimetype
-//       });
-//
-//       fs.access(filePath, fs.R_OK, (err) => {
-//         if(err !== null) {
-//           uploadPromise.reject(new Error('Unable to locate file'));
-//         } else {
-//           readStream.pipe(writeStream);
-//         }
-//       });
-//
-//       writeStream.on('success', function(file) {
-//         uploadPromise.resolve(file);
-//       });
-//
-//       return uploadPromise.promise;
-//     }
-//   };
-// }
-
-const pkgcloud = require('pkgcloud')
+const fs = require('fs')
 const config = require('config')
+const pkgcloud = require('pkgcloud')
+const ContainerError = require('./errors').ContainerError
 
 function create (tripId) {
   let client = pkgcloud.storage.createClient(config.get('storage'))
@@ -55,7 +9,7 @@ function create (tripId) {
   return new Promise((resolve, reject) => {
     client.createContainer({ name: tripId }, (error, container) => {
       if (error) {
-        reject(error)
+        reject(new ContainerError(error.message))
       } else {
         resolve(container)
       }
@@ -63,4 +17,31 @@ function create (tripId) {
   })
 }
 
-module.exports = { create }
+function uploadToStorage (file, tripId) {
+  return new Promise((resolve, reject) => {
+    let client = pkgcloud.storage.createClient(config.get('storage'))
+    let readStream = fs.createReadStream(file.path)
+
+    let writeStream = client.upload({
+      container: tripId,
+      remote: file.name,
+      contentType: file.mime
+    })
+
+    readStream.on('error', (err) => {
+      reject(new ContainerError(err.message))
+    })
+
+    writeStream.on('error', (err) => {
+      reject(new ContainerError(err.message))
+    })
+
+    writeStream.on('success', (file) => {
+      resolve(file)
+    })
+
+    readStream.pipe(writeStream)
+  })
+}
+
+module.exports = { create, uploadToStorage }

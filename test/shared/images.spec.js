@@ -15,15 +15,16 @@ describe('shared', () => {
         shared.images.should.have.property('getCoordinates')
       })
 
-      it('should return a rejected promise when the file is not found', (done) => {
+      it('should return a rejected promise when the file is not found', () => {
         // when
-        shared.images
+        var t = shared.images
           .getCoordinates('./fileThatDoesNotExist.jpg')
-          .then(() => {
-            done(new Error('should not be a success'))
-          }, () => {
-            done()
-          })
+
+        // Then
+        return t.then(() => {}, (error) => {
+          error.should.be.an.instanceof(shared.errors.classes.GPSError)
+          error.message.should.equal("Encountered the following error while trying to read given image: Error: ENOENT: no such file or directory, open './fileThatDoesNotExist.jpg'")
+        })
       })
 
       it('should return GPS coordinates', (done) => {

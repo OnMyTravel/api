@@ -244,7 +244,7 @@ describe('Step', () => {
 
     describe(':addImageToGallery', () => {
       let step, tripId
-      before((done) => {
+      beforeEach((done) => {
         tripId = Mongoose.Types.ObjectId()
         Step
           .create({ message: 'My new trip', trip_id: tripId })
@@ -277,8 +277,40 @@ describe('Step', () => {
           .then(() => {
             done(new Error('should not be considered as valid'))
           }, (err) => {
+            err.should.be.defined
             done()
           })
+      })
+
+      it('should save GPS informations', () => {
+        var expectedGPSInformations = {
+          GPSLatitudeRef: 'N',
+          GPSLatitude: [48, 51, 20.36],
+          GPSLongitudeRef: 'E',
+          GPSLongitude: [2, 16, 12.6],
+          GPSAltitudeRef: 0,
+          GPSAltitude: 42.93607305936073
+        }
+
+        var promise = repository
+          .addImageToGallery(step._id, {
+            source: 'uploads/imagename',
+            caption: 'An adorable kitten image',
+            size: 9646,
+            gps: expectedGPSInformations
+          })
+
+        return promise.then(() => {
+          return Step
+            .findById(step._id)
+            .then((step) => {
+              step.gallery.should.have.length(1)
+              var imageGPSDetails = step.gallery[0].gps.toJSON()
+
+              delete imageGPSDetails._id
+              imageGPSDetails.should.deep.eql(expectedGPSInformations)
+            })
+        })
       })
     })
   })
