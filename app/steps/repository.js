@@ -4,24 +4,28 @@ function create (model) {
   return new Step(model).save()
 }
 
-function findByTripId (trip_id) {
-  return Step.find({ trip_id })
+function findByTripId (tripId) {
+  return Step.find({ trip_id: tripId })
 }
 
-function findByTripIdAndStepId (trip_id, step_id) {
-  return Step.findOne({ trip_id, _id: step_id })
+function findByTripIdAndStepId (tripId, stepId) {
+  return Step.findOne({ trip_id: tripId, _id: stepId })
+}
+
+function findByTripIdStepIdAndImageId (tripId, stepId, imageSource) {
+  return Step.findOne({ trip_id: tripId, _id: stepId, 'gallery.source': imageSource })
 }
 
 function deleteById (id) {
   return Step.findByIdAndRemove(id)
 }
 
-function updateByTripIdAndStepId (trip_id, step_id, model) {
-  return Step.findByIdAndUpdate(step_id, { $set: model }, {runValidators: true, new: true})
+function updateByTripIdAndStepId (stepId, model) {
+  return Step.findByIdAndUpdate(stepId, { $set: model }, {runValidators: true, new: true})
 }
 
-function deleteByTripId (trip_id) {
-  return Step.remove({ trip_id })
+function deleteByTripId (tripId) {
+  return Step.remove({ trip_id: tripId })
 }
 
 function addImageToGallery (step_id, imageModel) {
@@ -33,4 +37,4 @@ function addImageToGallery (step_id, imageModel) {
     })
 }
 
-module.exports = { create, findByTripId, findByTripIdAndStepId, updateByTripIdAndStepId, deleteById, deleteByTripId, addImageToGallery }
+module.exports = { create, findByTripId, findByTripIdAndStepId, updateByTripIdAndStepId, deleteById, deleteByTripId, addImageToGallery, findByTripIdStepIdAndImageId }
