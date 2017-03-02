@@ -82,7 +82,7 @@ function updateOne (req, res) {
   delete stepChanges.gallery
 
   repository
-    .updateByTripIdAndStepId(req.params.tripid, req.params.stepid, stepChanges)
+    .updateByTripIdAndStepId(req.params.stepid, stepChanges)
     .then((step) => {
       res.json(step)
     })

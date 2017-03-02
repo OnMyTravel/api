@@ -59,140 +59,142 @@ const StepController = proxyquire(config.get('app-folder') + '/steps/controller'
 
 describe('Steps', () => {
   describe('controller', () => {
-    it('checks sanity', () => {
-      StepController.should.have.property('attach')
-    })
-
-    it('should return BAD_REQUEST if there are no file attached', () => {
-      // Given
-      let response = httpMocks.createResponse()
-      let request = httpMocks.createRequest({
-        method: 'POST',
-        url: ''
+    describe(':attach', () => {
+      it('checks sanity', () => {
+        StepController.should.have.property('attach')
       })
 
-      // When
-      StepController.attach(request, response)
-
-      // Then
-      response.getHeader('Content-Type').should.equal('application/json')
-      response.statusCode.should.equal(400)
-    })
-
-    describe('when a file is uploaded', () => {
-      let response, request
-
-      beforeEach(() => {
-        response = httpMocks.createResponse()
-        request = httpMocks.createRequest({
+      it('should return BAD_REQUEST if there are no file attached', () => {
+        // Given
+        let response = httpMocks.createResponse()
+        let request = httpMocks.createRequest({
           method: 'POST',
-          url: '',
-          file: {
-            filename: 'myfile.jpg',
-            path: 'path/to/myfile.jpg',
-            mime: 'image/jpeg',
-            size: '7246.4'
-          },
-          params: {
-            tripid: 'GOOD_ID',
-            stepid: 'GOOD_STEP_ID'
-          },
-          body: {
-            caption: 'My caption'
-          }
+          url: ''
         })
-      })
 
-      it('should extract coordinates from file', () => {
         // When
         StepController.attach(request, response)
 
         // Then
-        response.statusCode.should.equal(200)
-        getCoordinatesStub.should.have.been.calledWith('path/to/myfile.jpg')
+        response.getHeader('Content-Type').should.equal('application/json')
+        response.statusCode.should.equal(400)
       })
 
-      describe('when an error occurs while extracting coordinates', () => {
-        it('should return a Unprocessable Entity', () => {
-          // Given
-          request.file.path = 'path/to/errored/file.jpg'
+      describe('when a file is uploaded', () => {
+        let response, request
 
+        beforeEach(() => {
+          response = httpMocks.createResponse()
+          request = httpMocks.createRequest({
+            method: 'POST',
+            url: '',
+            file: {
+              filename: 'myfile.jpg',
+              path: 'path/to/myfile.jpg',
+              mime: 'image/jpeg',
+              size: '7246.4'
+            },
+            params: {
+              tripid: 'GOOD_ID',
+              stepid: 'GOOD_STEP_ID'
+            },
+            body: {
+              caption: 'My caption'
+            }
+          })
+        })
+
+        it('should extract coordinates from file', () => {
+          // When
+          StepController.attach(request, response)
+
+          // Then
+          response.statusCode.should.equal(200)
+          getCoordinatesStub.should.have.been.calledWith('path/to/myfile.jpg')
+        })
+
+        describe('when an error occurs while extracting coordinates', () => {
+          it('should return a Unprocessable Entity', () => {
+            // Given
+            request.file.path = 'path/to/errored/file.jpg'
+
+            // When
+            let t = StepController.attach(request, response)
+
+            // Then
+            return t.then((e) => {
+              response.statusCode.should.equal(422)
+              getCoordinatesStub.should.have.been.calledWith('path/to/errored/file.jpg')
+            })
+          })
+        })
+
+        it('should remove the saved file', () => {
+          // When
+          let t = StepController.attach(request, response)
+
+          // Then
+          return t.then(() => {
+            fsUnlinkSyncStub.should.have.been.calledWith('path/to/myfile.jpg')
+            response.statusCode.should.equal(201)
+          })
+        })
+
+        it('should upload the image', () => {
           // When
           let t = StepController.attach(request, response)
 
           // Then
           return t.then((e) => {
-            response.statusCode.should.equal(422)
-            getCoordinatesStub.should.have.been.calledWith('path/to/errored/file.jpg')
+            response.statusCode.should.equal(201)
+            uploadToStorageStub.should.have.been.calledWith({
+              path: 'path/to/myfile.jpg',
+              name: 'myfile.jpg',
+              mime: 'image/jpeg'
+            }, 'GOOD_ID')
           })
         })
-      })
 
-      it('should remove the saved file', () => {
-        // When
-        let t = StepController.attach(request, response)
-
-        // Then
-        return t.then(() => {
-          fsUnlinkSyncStub.should.have.been.calledWith('path/to/myfile.jpg')
-          response.statusCode.should.equal(201)
-        })
-      })
-
-      it('should upload the image', () => {
-        // When
-        let t = StepController.attach(request, response)
-
-        // Then
-        return t.then((e) => {
-          response.statusCode.should.equal(201)
-          uploadToStorageStub.should.have.been.calledWith({
-            path: 'path/to/myfile.jpg',
-            name: 'myfile.jpg',
-            mime: 'image/jpeg'
-          }, 'GOOD_ID')
-        })
-      })
-
-      it('should save the image in database', () => {
-        // When
-        let t = StepController.attach(request, response)
-
-        // Then
-        return t.then((e) => {
-          addImageToGalleryStub.should.have.been.calledWith('GOOD_STEP_ID', {
-            caption: 'My caption',
-            source: 'myfile.jpg',
-            size: '7246.4',
-            gps: COORDINATES
-          })
-          response.statusCode.should.equal(201)
-        })
-      })
-
-      it('return database informations', () => {
-        // When
-        let t = StepController.attach(request, response)
-
-        // Then
-        return t.then((e) => {
-          response.statusCode.should.equal(201)
-          var data = JSON.parse(response._getData())
-          data.should.be.deep.equal(STEP_SAVED_IN_DB)
-        })
-      })
-
-      describe('when the upload fails', () => {
-        it('should return INTERNAL ERROR', () => {
-          // Given
-          request.params.tripid = 'ERRORED_ID'
-
+        it('should save the image in database', () => {
           // When
           let t = StepController.attach(request, response)
 
           // Then
           return t.then((e) => {
-            response.statusCode.should.equal(500)
+            addImageToGalleryStub.should.have.been.calledWith('GOOD_STEP_ID', {
+              caption: 'My caption',
+              source: 'myfile.jpg',
+              size: '7246.4',
+              gps: COORDINATES
+            })
+            response.statusCode.should.equal(201)
+          })
+        })
+
+        it('return database informations', () => {
+          // When
+          let t = StepController.attach(request, response)
+
+          // Then
+          return t.then((e) => {
+            response.statusCode.should.equal(201)
+            var data = JSON.parse(response._getData())
+            data.should.be.deep.equal(STEP_SAVED_IN_DB)
+          })
+        })
+
+        describe('when the upload fails', () => {
+          it('should return INTERNAL ERROR', () => {
+            // Given
+            request.params.tripid = 'ERRORED_ID'
+
+            // When
+            let t = StepController.attach(request, response)
+
+            // Then
+            return t.then((e) => {
+              response.statusCode.should.equal(500)
+            })
           })
         })
       })
