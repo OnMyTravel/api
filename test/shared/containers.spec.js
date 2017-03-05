@@ -1,5 +1,6 @@
 const shared = require('../../app/shared')
 const proxyquire = require('proxyquire').noPreserveCache()
+const httpMocks = require('node-mocks-http')
 
 const StreamTest = require('streamtest')['v2']
 const faker = require('faker')
@@ -21,10 +22,12 @@ const storageConfig = {
 }
 
 let uploadStub = sinon.stub()
+let downloadStub = sinon.stub()
 const createClientStub = sinon.stub()
 createClientStub.returns({
   createContainer: createContainerStub,
-  upload: uploadStub
+  upload: uploadStub,
+  download: downloadStub
 })
 
 var pkgcloudStub = {
@@ -231,6 +234,37 @@ describe('Shared', () => {
           }, (err) => {
             err.should.be.undefined()
           })
+        })
+      })
+    })
+
+    describe(':download', () => {
+      it('checks sanity', () => {
+        shared.containers.download.should.be.defined
+      })
+
+      it('should create a storageClient', () => {
+        // When
+        containers.download()
+
+        // Then
+        createClientStub.should.have.been.calledWith(storageConfig)
+      })
+
+      it('should call download', () => {
+        // Given
+        let tripId = 'TRIPID'
+        let filename = 'FILENAME'
+        let response = httpMocks.createResponse()
+
+        // When
+        containers.download(tripId, filename, response)
+
+        // Then
+        downloadStub.should.have.been.calledWith({
+          container: tripId,
+          remote: filename,
+          stream: response
         })
       })
     })

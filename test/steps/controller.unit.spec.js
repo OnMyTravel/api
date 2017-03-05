@@ -37,6 +37,7 @@ uploadToStorageStub.withArgs(sinon.match.any, 'GOOD_ID')
 uploadToStorageStub.withArgs(sinon.match.any, 'ERRORED_ID')
   .returns(new Promise((resolve, reject) => { reject(new ContainerError('Unable to upload the file')) }))
 
+let downloadStub = sinon.stub()
 let fsUnlinkSyncStub = sinon.stub()
 let addImageToGalleryStub = sinon.stub().returns(new Promise(function (resolve, reject) { resolve(STEP_SAVED_IN_DB) }))
 let mocks = {
@@ -45,7 +46,8 @@ let mocks = {
       getCoordinates: getCoordinatesStub
     },
     containers: {
-      uploadToStorage: uploadToStorageStub
+      uploadToStorage: uploadToStorageStub,
+      download: downloadStub
     }
   },
   fs: {
@@ -197,6 +199,35 @@ describe('Steps', () => {
             })
           })
         })
+      })
+    })
+
+    describe(':getImage', () => {
+      it('checks sanity', () => {
+        StepController.should.have.property('getImage')
+      })
+
+      it('should call destroy function from container', () => {
+        // Given
+        let response = httpMocks.createResponse()
+        let request = httpMocks.createRequest({
+          method: 'GET',
+          url: '',
+          params: {
+            tripid: 'GOOD_ID',
+            stepid: 'GOOD_STEP_ID',
+            imageid: 'GOOD_IMAGE_ID'
+          },
+          body: {
+            caption: 'My caption'
+          }
+        })
+
+        // When
+        StepController.getImage(request, response)
+
+        // Then
+        downloadStub.should.have.been.calledWith('GOOD_ID', 'GOOD_IMAGE_ID', response)
       })
     })
   })

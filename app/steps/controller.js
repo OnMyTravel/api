@@ -88,4 +88,8 @@ function updateOne (req, res) {
     })
 }
 
-module.exports = { get, create, deleteOne, updateOne, attach }
+function getImage(req, res) {
+  shared.containers.download(req.params.tripid, req.params.imageid, res)
+}
+
+module.exports = { get, create, deleteOne, updateOne, attach, getImage }

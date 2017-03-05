@@ -44,4 +44,15 @@ function uploadToStorage (file, tripId) {
   })
 }
 
-module.exports = { create, uploadToStorage }
+function download (tripId, filename, response) {
+  console.log(config.get('storage'))
+  let client = pkgcloud.storage.createClient(config.get('storage'))
+
+  client.download({
+    container: tripId,
+    remote: filename,
+    stream: response
+  })
+}
+
+module.exports = { create, uploadToStorage, download }

@@ -385,7 +385,7 @@ describe('Steps', () => {
       })
     })
 
-    describe.only(':updateOne', () => {
+    describe(':updateOne', () => {
       let userId, trip, step, token
 
       before((done) => {
@@ -436,7 +436,7 @@ describe('Steps', () => {
           })
         })
 
-        describe.only('and the trip exists', () => {
+        describe('and the trip exists', () => {
           describe('but the client is not allowed to edit it', () => {
             it('shoud return FORBIDDEN', (done) => {
               let token = shared.tokens.create(mongoose.Types.ObjectId().toString(), '')
