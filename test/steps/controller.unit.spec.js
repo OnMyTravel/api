@@ -93,7 +93,7 @@ describe('Steps', () => {
             file: {
               filename: 'myfile.jpg',
               path: 'path/to/myfile.jpg',
-              mime: 'image/jpeg',
+              mimetype: 'image/jpeg',
               size: '7246.4'
             },
             params: {

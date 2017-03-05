@@ -39,7 +39,7 @@ function attach (req, res) {
   if (req.file) {
     let imageDetails = {
       path: req.file.path,
-      mime: req.file.mime,
+      mime: req.file.mimetype,
       name: req.file.filename
     }
 
