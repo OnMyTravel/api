@@ -18,7 +18,7 @@ const UNAUTHORIZEDTOKEN = 'EAACEdEose0cBAM8BlABqcgQlCIZCZAZAJgW60opqGtC3iIfg2gZB
 
 describe('Users', () => {
   describe('/users/register/facebook', () => {
-    describe.only('when facebook token is wrong', () => {
+    describe('when facebook token is wrong', () => {
       beforeEach(() => {
         mockHttpAnswser(facebookResponses.UNAUTHORIZED, UNAUTHORIZEDTOKEN)
       })

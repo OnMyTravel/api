@@ -39,7 +39,7 @@ function attach (req, res) {
   if (req.file) {
     let imageDetails = {
       path: req.file.path,
-      mime: req.file.mime,
+      mime: req.file.mimetype,
       name: req.file.filename
     }
 
@@ -82,10 +82,14 @@ function updateOne (req, res) {
   delete stepChanges.gallery
 
   repository
-    .updateByTripIdAndStepId(req.params.tripid, req.params.stepid, stepChanges)
+    .updateByTripIdAndStepId(req.params.stepid, stepChanges)
     .then((step) => {
       res.json(step)
     })
 }
 
-module.exports = { get, create, deleteOne, updateOne, attach }
+function getImage(req, res) {
+  shared.containers.download(req.params.tripid, req.params.imageid, res)
+}
+
+module.exports = { get, create, deleteOne, updateOne, attach, getImage }

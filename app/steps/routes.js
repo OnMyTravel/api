@@ -17,4 +17,6 @@ router.post('/:stepid/attach', isAuthenticated, trip.existsAndIsEditable, step.e
 router.delete('/:stepid', isAuthenticated, trip.existsAndIsEditable, step.exists, controller.deleteOne)
 router.put('/:stepid', isAuthenticated, trip.existsAndIsEditable, step.exists, controller.updateOne)
 
+router.get('/:stepid/images/:imageid', step.fileExists, controller.getImage)
+
 module.exports = router

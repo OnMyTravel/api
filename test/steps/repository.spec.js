@@ -3,6 +3,7 @@ const Faker = require('faker')
 const chai = require('chai')
 chai.should()
 chai.use(require('sinon-chai'))
+const expect = chai.expect
 
 const config = require('config')
 const Step = require(config.get('app-folder') + '/steps/models/step')
@@ -165,7 +166,7 @@ describe('Step', () => {
 
       it('should partially update the document', (done) => {
         repository
-          .updateByTripIdAndStepId(tripId, step._id, { message: 'NEW MESSAGE FOR STEP' })
+          .updateByTripIdAndStepId(step._id, { message: 'NEW MESSAGE FOR STEP' })
           .then((data) => {
             Step
               .findById(step._id)
@@ -180,7 +181,7 @@ describe('Step', () => {
 
       it('should return an error when payload is wrong', (done) => {
         repository
-          .updateByTripIdAndStepId(tripId, step._id, { trip_id: null })
+          .updateByTripIdAndStepId(step._id, { trip_id: null })
           .then((data) => {
             done(new Error('Should not succeed with a name null'))
           }, () => {
@@ -190,7 +191,7 @@ describe('Step', () => {
 
       it('should return the updated step', (done) => {
         repository
-          .updateByTripIdAndStepId(null, step._id, { message: 'A SUPER NEW MESSAGE' })
+          .updateByTripIdAndStepId(step._id, { message: 'A SUPER NEW MESSAGE' })
           .then((step, test) => {
             step.message.should.equal('A SUPER NEW MESSAGE')
             done()
@@ -310,6 +311,64 @@ describe('Step', () => {
               delete imageGPSDetails._id
               imageGPSDetails.should.deep.eql(expectedGPSInformations)
             })
+        })
+      })
+    })
+
+    describe(':findByTripIdStepIdAndImageId', () => {
+      let tripId, imageId, createdStep
+
+      before((done) => {
+        tripId = Mongoose.Types.ObjectId()
+        imageId = Mongoose.Types.ObjectId()
+
+        Step
+          .create({ trip_id: tripId, message: Faker.lorem.sentence(), gallery: [{ _id: imageId, source: 'path/to/file.png' }] })
+          .then((step) => {
+            createdStep = step
+            done()
+          })
+      })
+
+      it('checks sanity', () => {
+        repository.should.have.property('findByTripIdStepIdAndImageId')
+        repository.findByTripIdStepIdAndImageId.should.be.a('function')
+      })
+
+      it('should find step according to the parameters', () => {
+        var prom = repository
+          .findByTripIdStepIdAndImageId(tripId, createdStep._id, 'path/to/file.png')
+
+        return prom.then((step) => {
+          step.should.be.defined
+          step._id.toString().should.be.equal(createdStep._id.toString())
+        })
+      })
+
+      it('when trip does not exist', () => {
+        var prom = repository
+          .findByTripIdStepIdAndImageId(Mongoose.Types.ObjectId(), createdStep._id, 'path/to/file.png')
+
+        return prom.then((step) => {
+          expect(step).to.be.null
+        })
+      })
+
+      it('when the step does not exist', () => {
+        var prom = repository
+          .findByTripIdStepIdAndImageId(tripId, Mongoose.Types.ObjectId(), 'path/to/file.png')
+
+        return prom.then((step) => {
+          expect(step).to.be.null
+        })
+      })
+
+      it('when the source does not exist', () => {
+        var prom = repository
+          .findByTripIdStepIdAndImageId(tripId, createdStep._id, 'sourcename.does.not.exist')
+
+        return prom.then((step) => {
+          expect(step).to.be.null
         })
       })
     })

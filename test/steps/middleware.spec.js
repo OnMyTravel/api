@@ -1,3 +1,4 @@
+const proxyquire = require('proxyquire').noPreserveCache()
 const config = require('config')
 const sinon = require('sinon')
 const expect = require('chai').expect
@@ -6,7 +7,15 @@ const Faker = require('faker')
 const httpMocks = require('node-mocks-http')
 const Step = require(config.get('app-folder') + '/steps/models/step')
 
-const stepMiddleware = require(config.get('app-folder') + '/steps/middleware')
+let stepMiddlewarePath = config.get('app-folder') + '/steps/middleware'
+
+const findByTripIdStepIdAndImageIdStub = sinon.stub()
+const stepMiddleware = require(stepMiddlewarePath)
+const stubStepMiddleware = proxyquire(stepMiddlewarePath, {
+  './repository': {
+    findByTripIdStepIdAndImageId: findByTripIdStepIdAndImageIdStub
+  }
+})
 
 describe('Step', () => {
   describe('middleware', () => {
@@ -109,6 +118,70 @@ describe('Step', () => {
 
         // Then
         next.should.have.been.called
+      })
+    })
+
+    describe(':fileExists', () => {
+      it('should call next when the image exists', () => {
+        // Given
+        let response = httpMocks.createResponse()
+        let request = httpMocks.createRequest({})
+        let nextSpy = sinon.spy()
+        findByTripIdStepIdAndImageIdStub.returns(Promise.resolve({}))
+
+        // When
+        var promise = stubStepMiddleware.fileExists(request, response, nextSpy)
+
+        // Then
+        return promise.then(() => {
+          nextSpy.should.have.been.called
+        })
+      })
+
+      describe('when the resource does not exist', () => {
+        it('should not call next', () => {
+          // Given
+          findByTripIdStepIdAndImageIdStub.returns(Promise.resolve(null))
+          let tripid = mongoose.Types.ObjectId().toString()
+          let stepid = mongoose.Types.ObjectId().toString()
+          let imageSource = mongoose.Types.ObjectId().toString()
+
+          let nextSpy = sinon.spy()
+          let response = httpMocks.createResponse()
+          let request = httpMocks.createRequest({
+            params: { tripid, stepid, imageid: imageSource }
+          })
+
+          // When
+          var promise = stubStepMiddleware.fileExists(request, response, nextSpy)
+
+          // Then
+          return promise.then(() => {
+            findByTripIdStepIdAndImageIdStub.should.have.been.calledWith(tripid, stepid, imageSource)
+            nextSpy.should.not.have.been.called
+          })
+        })
+
+        it('should return a 404 error', () => {
+          // Given
+          findByTripIdStepIdAndImageIdStub.returns(Promise.resolve(null))
+          let response = httpMocks.createResponse()
+          let request = httpMocks.createRequest({
+            params: {
+              tripid: mongoose.Types.ObjectId().toString(),
+              stepid: mongoose.Types.ObjectId().toString(),
+              imageid: mongoose.Types.ObjectId().toString()
+            }
+          })
+
+          // When
+          var promise = stubStepMiddleware.fileExists(request, response, sinon.spy())
+
+          // Then
+          return promise.then(() => {
+            response.statusCode.should.be.equal(404)
+          })
+        })
       })
     })
   })
