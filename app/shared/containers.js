@@ -45,7 +45,6 @@ function uploadToStorage (file, tripId) {
 }
 
 function download (tripId, filename, response) {
-  console.log(config.get('storage'))
   let client = pkgcloud.storage.createClient(config.get('storage'))
 
   client.download({
@@ -55,4 +54,18 @@ function download (tripId, filename, response) {
   })
 }
 
-module.exports = { create, uploadToStorage, download }
+function deleteFile (tripId, imageId) {
+  return new Promise(function (resolve, reject) {
+    let client = pkgcloud.storage.createClient(config.get('storage'))
+
+    client.removeFile(tripId, imageId, function (err, result) {
+      if (err) {
+        reject(new ContainerError(err.message))
+      } else {
+        resolve()
+      }
+    })
+  })
+}
+
+module.exports = { create, uploadToStorage, download, deleteFile }
