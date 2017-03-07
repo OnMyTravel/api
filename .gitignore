@@ -44,4 +44,5 @@ jspm_packages
 *.tgz
 
 # Let's ignore configuration
-config/production.json
+./config/production.json
+./config/development.json

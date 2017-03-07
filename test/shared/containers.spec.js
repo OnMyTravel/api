@@ -23,11 +23,13 @@ const storageConfig = {
 
 let uploadStub = sinon.stub()
 let downloadStub = sinon.stub()
+let removeFileStub = sinon.stub()
 const createClientStub = sinon.stub()
 createClientStub.returns({
   createContainer: createContainerStub,
   upload: uploadStub,
-  download: downloadStub
+  download: downloadStub,
+  removeFile: removeFileStub
 })
 
 var pkgcloudStub = {
@@ -265,6 +267,56 @@ describe('Shared', () => {
           container: tripId,
           remote: filename,
           stream: response
+        })
+      })
+    })
+
+    describe(':deleteFile', () => {
+      it('checks sanity', () => {
+        containers.deleteFile.should.be.defined
+      })
+
+      it('should call create client with config', () => {
+        // Given
+        removeFileStub.callsArgWith(2, null, {})
+
+        // When
+        let promise = containers.deleteFile()
+
+        // Then
+        return promise.then(() => {
+          createClientStub.should.have.been.calledWith(storageConfig)
+        })
+      })
+
+      it('should return a rejected promise when something turns sour', () => {
+        // Given
+        removeFileStub.callsArgWith(2, new Error('Unable to remove that document'), null)
+
+        // When
+        let promise = containers.deleteFile()
+
+        // Then
+        return promise.then(() => {
+          throw new Error('Should not succeed')
+        }, (error) => {
+          error.should.be.an.instanceof(shared.errors.classes.ContainerError)
+          error.message.should.equal('Unable to remove that document')
+        })
+      })
+
+      it('should call removeFile with arguments', () => {
+        // Given
+        removeFileStub.callsArgWith(2, null, {})
+        let tripId = 'TRIP_ID'
+        let imageId = 'IMAGE_ID'
+
+        // When
+        let promise = containers.deleteFile(tripId, imageId)
+
+        // Then
+        return promise.then(() => {
+          removeFileStub.should.have.been.calledWith(tripId, imageId)
         })
       })
     })

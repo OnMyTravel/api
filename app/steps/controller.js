@@ -1,4 +1,5 @@
 const fs = require('fs')
+const winston = require('winston')
 const shared = require('../shared')
 const errors = shared.errors.classes
 const statusCode = require('http-status-codes')
@@ -28,10 +29,29 @@ function create (req, res) {
 }
 
 function deleteOne (req, res) {
-  repository
-    .deleteById(req.params.stepid)
-    .then(() => {
-      res.status(200).json()
+  return repository
+    .findByTripIdAndStepId(req.params.tripid, req.params.stepid)
+    .then((step) => {
+      if (step != null) {
+        let promises = []
+        step.gallery.forEach((image) => {
+          promises.push(shared.containers.deleteFile(req.params.tripid, image.source))
+        })
+
+        repository
+          .deleteById(req.params.stepid)
+          .then(() => {
+            res.json()
+          })
+
+        return Promise
+          .all(promises)
+          .catch((error) => {
+            winston.error(error)
+          })
+      } else {
+        res.status(statusCode.NOT_FOUND).json()
+      }
     })
 }
 
@@ -68,7 +88,7 @@ function attach (req, res) {
           res.status(statusCode.INTERNAL_SERVER_ERROR).json()
         } else {
           // FIXME: We should deal with that
-          //console.log(error)
+          // console.log(error)
         }
       })
   } else {
@@ -88,7 +108,7 @@ function updateOne (req, res) {
     })
 }
 
-function getImage(req, res) {
+function getImage (req, res) {
   shared.containers.download(req.params.tripid, req.params.imageid, res)
 }
 
