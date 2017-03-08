@@ -64,17 +64,17 @@ function updateOne (req, res) {
 }
 
 function deleteOne (req, res) {
-  return tripRepository
-    .deleteById(req.params.tripid)
+  return shared.containers.destroy(req.params.tripid)
     .then(() => {
-      stepRepository
-        .deleteByTripId(req.params.tripid)
-        .then(() => {
-          res.status(httpStatus.OK).json()
-        }, () => {
-          res.status(httpStatus.INTERNAL_SERVER_ERROR).json()
-        })
-    }, () => {
+      return tripRepository.deleteById(req.params.tripid)
+    })
+    .then(() => {
+      return stepRepository.deleteByTripId(req.params.tripid)
+    })
+    .then(() => {
+      res.status(httpStatus.OK).json()
+    })
+    .catch(() => {
       res.status(httpStatus.INTERNAL_SERVER_ERROR).json()
     })
 }

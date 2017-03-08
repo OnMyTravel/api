@@ -68,4 +68,17 @@ function deleteFile (tripId, imageId) {
   })
 }
 
-module.exports = { create, uploadToStorage, download, deleteFile }
+function destroy (tripId) {
+  return new Promise((resolve, reject) => {
+    let client = pkgcloud.storage.createClient(config.get('storage'))
+    client.destroyContainer(tripId, function (err, container) {
+      if (err) {
+        reject(new ContainerError(err.message))
+      } else {
+        resolve()
+      }
+    })
+  })
+}
+
+module.exports = { create, uploadToStorage, download, deleteFile, destroy }

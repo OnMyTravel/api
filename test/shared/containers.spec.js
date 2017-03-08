@@ -24,12 +24,14 @@ const storageConfig = {
 let uploadStub = sinon.stub()
 let downloadStub = sinon.stub()
 let removeFileStub = sinon.stub()
-const createClientStub = sinon.stub()
+let destroyContainerStub = sinon.stub()
+let createClientStub = sinon.stub()
 createClientStub.returns({
   createContainer: createContainerStub,
   upload: uploadStub,
   download: downloadStub,
-  removeFile: removeFileStub
+  removeFile: removeFileStub,
+  destroyContainer: destroyContainerStub
 })
 
 var pkgcloudStub = {
@@ -56,6 +58,14 @@ const containers = proxyquire('../../app/shared/containers', {
 
 describe('Shared', () => {
   describe('containers', () => {
+    beforeEach(() => {
+      createClientStub.reset()
+      uploadStub.reset()
+      downloadStub.reset()
+      removeFileStub.reset()
+      destroyContainerStub.reset()
+    })
+
     it('checks sanity', () => {
       shared.containers.should.be.defined
     })
@@ -317,6 +327,66 @@ describe('Shared', () => {
         // Then
         return promise.then(() => {
           removeFileStub.should.have.been.calledWith(tripId, imageId)
+        })
+      })
+    })
+
+    describe(':destroy', () => {
+      it('checks sanity', () => {
+        containers.destroy.should.be.defined
+      })
+
+      it('should create a storageClient', () => {
+        // When
+        containers.destroy()
+
+        // Then
+        createClientStub.should.have.been.calledWith(storageConfig)
+      })
+
+      it('should call destroyContainer', () => {
+        // Given
+        let tripId = '2345678'
+
+        // When
+        containers.destroy(tripId)
+
+        // Then
+        destroyContainerStub.should.have.been.calledWith(tripId)
+      })
+
+      it('should return a rejected promise when unable to destroy the container', () => {
+        // Given
+        let tripId = '873'
+        destroyContainerStub.callsArgWith(1, new Error('Unable to destroy container'))
+
+        // When
+        let promise = containers.destroy(tripId)
+
+        // Then
+        return promise.then(() => {
+          throw new Error('Should not be successfull')
+        }, (error) => {
+          error.should.be.an.instanceof(shared.errors.classes.ContainerError)
+          error.message.should.equal('Unable to destroy container')
+        })
+      })
+
+      it('should return a resolved promise when deletion worked', () => {
+        // Given
+        let tripId = '873'
+        destroyContainerStub.callsArgWith(1, null, {})
+
+        // When
+        let promise = containers.destroy(tripId)
+
+        // Then
+        return promise.then(() => {
+
+        }, (error) => {
+          throw new Error('Should not be on error')
+          error.should.be.an.instanceof(shared.errors.classes.ContainerError)
+          error.message.should.equal('Unable to destroy container')
         })
       })
     })
