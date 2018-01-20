@@ -1,19 +1,19 @@
-const tripRepository = require('./repository')
-const stepRepository = require('../steps/repository')
-const httpStatus = require('http-status-codes')
-const shared = require('../shared')
+const tripRepository = require('./repository');
+const stepRepository = require('../steps/repository');
+const httpStatus = require('http-status-codes');
+const shared = require('../shared');
 
 function create (req, res) {
-  let token = shared.tokens.getToken(req)
-  let decodedToken = shared.tokens.decode(token)
+  let token = shared.tokens.getToken(req);
+  let decodedToken = shared.tokens.decode(token);
 
-  let newTripPayload = req.body
-  newTripPayload.owner_id = decodedToken.id
+  let newTripPayload = req.body;
+  newTripPayload.owner_id = decodedToken.id;
 
   return tripRepository
     .create(newTripPayload)
     .then((createdTrip) => {
-      shared.containers
+      return shared.containers
         .create(createdTrip._id)
         .then(() => {
           return res.status(httpStatus.CREATED).json(createdTrip)
@@ -26,8 +26,8 @@ function create (req, res) {
 }
 
 function getAll (req, res) {
-  let token = shared.tokens.getToken(req)
-  let decodedToken = shared.tokens.decode(token)
+  let token = shared.tokens.getToken(req);
+  let decodedToken = shared.tokens.decode(token);
 
   tripRepository
     .findByOwnerId(decodedToken.id)

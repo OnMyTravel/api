@@ -20,7 +20,9 @@ mongoose.connect(config.database.host, options);
 let db = mongoose.connection;
 
 // Once the connexion is failed
-db.on('error', console.error.bind(console, 'Database error:'));
+db.on('error', (err) => {
+    console.error(err);
+});
 
 // Once the connexion is opened
 db.on('open', () => {

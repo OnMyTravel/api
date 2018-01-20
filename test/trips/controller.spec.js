@@ -1,17 +1,15 @@
 /* global describe, it, before */
-const config = require('config')
-const app = require(config.get('app-root') + '/index')
-const Faker = require('faker')
-const Trip = require(config.get('app-folder') + '/trips/model')
-const Step = require(config.get('app-folder') + '/steps/models/step')
-const shared = require(config.get('app-folder') + '/shared')
+const app = require('../../index');
+const Faker = require('faker');
+const Trip = require('../../app/trips/model');
+const shared = require('../../app/shared');
 
-const chai = require('chai')
-const chaiHttp = require('chai-http')
-const mongoose = require('mongoose')
+const chai = require('chai');
+const chaiHttp = require('chai-http');
+const mongoose = require('mongoose');
 
-chai.should()
-chai.use(chaiHttp)
+chai.should();
+chai.use(chaiHttp);
 
 describe('Trips', function () {
   describe('controller', function () {
@@ -119,10 +117,10 @@ describe('Trips', function () {
             .set('Authorization', 'Bearer ' + token)
             .send({})
             .end((e, res) => {
-              res.should.have.status(400)
-              done()
-            })
-        })
+              res.should.have.status(400);
+              done();
+            });
+        });
 
         it('should have a payload', (done) => {
           chai.request(app)
@@ -130,9 +128,9 @@ describe('Trips', function () {
             .set('Authorization', 'Bearer ' + token)
             .send({})
             .end((e, res) => {
-              res.should.have.status(400)
+              res.should.have.status(400);
               res.body.should.be.deep.equal({
-                message: 'Trip validation failed',
+                message: 'Trip validation failed: name: Path `name` is required.',
                 name: 'ValidationError',
                 errors: {
                   name: {
@@ -140,12 +138,12 @@ describe('Trips', function () {
                     kind: 'required'
                   }
                 }
-              })
-              done()
-            })
-        })
-      })
-    })
+              });
+              done();
+            });
+        });
+      });
+    });
 
     describe(':getOne', () => {
       let trip, userId
