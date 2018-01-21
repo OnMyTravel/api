@@ -87,28 +87,28 @@ describe('Trip', () => {
 
       describe('when containers creation failed', () => {
         before(() => {
-          createContainerStub.reset()
+          createContainerStub.reset();
           createContainerStub.withArgs(TRIP_ID).returns(new Promise((resolve, reject) => { reject() }))
-        })
+        });
 
         it('should return a bad gateway', () => {
           // Given
-          let response = httpMocks.createResponse()
+          let response = httpMocks.createResponse();
           let request = httpMocks.createRequest({
             method: 'POST',
             url: '/trips',
             headers: {
               'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU4NjY5MzdkMzQ3NjYxNzY0MzY0ZmNmOCIsImZhY2Vib29rX2FjY2Vzc190b2tlbiI6IkVBQUNFZEVvc2UwY0JBRTI2VzJmM3M0QVpDUFNpSmNMZkNHTmd1SGVNME9jdUdXU1NWOTBPeE9OdHh5clg0TUZrakVkOVpBbko3NTVXN0NFYUhCYlpCY1lqcllaQkRVUnlwYWtsazJsQWtJR2Q3RlA2QWV2eFF2OWVFU0xveW5xSUtMZkxFbUFWaGRGV2loaGxPOEg5aGtSZEFtYk93M1pDU3Fmc1pBWkFmQnl4d1pEWkQiLCJpYXQiOjE0ODUxNjEzOTUsImV4cCI6MTQ4NTE2NDk5NX0.b4UaaskpGlWxVAcFsFKl3cUhstszER6cxUrCWUaqRik'
             }
-          })
+          });
 
           // When
-          let t = TripController.create(request, response)
+          let t = TripController.create(request, response);
 
           // Then
           return t.then(() => {
-            createContainerStub.should.have.been.calledWith(TRIP_ID)
-            response.statusCode.should.equal(502)
+            createContainerStub.should.have.been.calledWith(TRIP_ID);
+            response.statusCode.should.equal(502);
           })
         })
       })
