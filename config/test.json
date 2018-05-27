@@ -6,8 +6,5 @@
   "app-folder": "../../app",
   "app-root": "../..",
   "app": {
-    "logs": {
-      "enabled": false
-    }
   }
 }

@@ -1,10 +1,10 @@
-let mongoose = require('mongoose');
+const mongoose = require('mongoose');
 mongoose.Promise = require('bluebird');
 
-let config = require('config');
+const config = require('config');
 
-let pjson = require('./package.json');
-let api = require('./app');
+const pjson = require('./package.json');
+const api = require('./app');
 
 const options = {
     useMongoClient: true,
@@ -17,7 +17,7 @@ const options = {
 };
 
 mongoose.connect(config.database.host, options);
-let db = mongoose.connection;
+const db = mongoose.connection;
 
 // Once the connexion is failed
 db.on('error', (err) => {
@@ -30,7 +30,5 @@ db.on('open', () => {
         console.log(pjson.name + ': running on port ' + config.app.port);
     });
 });
-
-
 
 module.exports = api;

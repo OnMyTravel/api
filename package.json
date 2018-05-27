@@ -38,7 +38,7 @@
     "http-status-codes": "^1.0.6",
     "jsonwebtoken": "^7.1.9",
     "mongoose": "^4.13.9",
-    "morgan": "^1.7.0",
+    "morgan": "^1.9.0",
     "multer": "^1.2.1",
     "node-rest-client": "^2.0.1",
     "pkgcloud": "^1.4.0",

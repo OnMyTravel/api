@@ -1,10 +1,6 @@
 {
   "app": {
-    "port": 3001,
-    "logs": {
-      "enabled": true,
-      "path": "logs/access.log"
-    }
+    "port": 3001
   },
   "database": {
       "host": "mongodb://localhost/onmytravel-dev"
