@@ -1,6 +1,6 @@
 {
   "app": {
-    "port": 3000,
+    "port": 3001,
     "logs": {
       "enabled": true,
       "path": "logs/access.log"
@@ -9,6 +9,7 @@
   "database": {
       "host": "mongodb://localhost/onmytravel-dev"
   },
+  "app-secret": "supersecret",
   "storage": {
     "provider": "provider",
     "username": "KE2QXVrk",
