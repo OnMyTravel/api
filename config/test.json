@@ -6,5 +6,6 @@
   "app-folder": "../../app",
   "app-root": "../..",
   "app": {
+    "port": 3000
   }
 }
