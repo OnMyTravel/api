@@ -1,11 +1,12 @@
 /* global describe it */
 const config = require('config')
-const app = require(config.get('app-root') + '/index')
-const Trip = require(config.get('app-folder') + '/trips/model')
-const Step = require(config.get('app-folder') + '/steps/models/step')
+const app = require('../../app/index')
+const db = require('../../database')
+const Trip = require('../../app/trips/model')
+const Step = require('../../app/steps/models/step')
 const Faker = require('faker')
 const mongoose = require('mongoose')
-const shared = require(config.get('app-folder') + '/shared')
+const shared = require('../../app/shared')
 const fs = require('fs')
 
 const chai = require('chai')
@@ -13,9 +14,20 @@ const chaiHttp = require('chai-http')
 chai.should()
 chai.use(chaiHttp)
 
-describe('Steps', () => {
+describe('Functional | Steps', () => {
+
+  let dbConnexion;
+  beforeEach(() => {
+    dbConnexion = db.openDatabaseConnexion()
+  })
+
+  afterEach(() => {
+    dbConnexion.close()
+  })
+
   describe('controller', () => {
     describe(':deleteOne', () => {
+
       describe('when the user is not authenticated', () => {
         it('should return UNAUTHORIZED', (done) => {
           chai.request(app)
@@ -29,7 +41,7 @@ describe('Steps', () => {
 
       describe('when the trip does not exist', () => {
         it('should return NOT_FOUND', (done) => {
-          let token = shared.tokens.create('', '')
+          let token = shared.tokens.create(mongoose.Types.ObjectId().toString(), '')
 
           chai.request(app)
             .delete('/trips/' + mongoose.Types.ObjectId() + '/steps/' + mongoose.Types.ObjectId())
@@ -44,15 +56,14 @@ describe('Steps', () => {
       describe('when the trip exists', () => {
         let trip, token
 
-        before((done) => {
+        beforeEach(() => {
           let name = Faker.lorem.sentence()
           let owner_id = mongoose.Types.ObjectId()
           token = shared.tokens.create(owner_id, '')
 
-          Trip.create({ name, owner_id })
+          return Trip.create({ name, owner_id })
             .then((createdTrip) => {
               trip = createdTrip
-              done()
             })
         })
 
@@ -82,16 +93,16 @@ describe('Steps', () => {
         })
 
         describe('and the step exists', () => {
+
           let step
-          before((done) => {
-            Step
+          beforeEach(() => {
+            return Step
               .create({
                 trip_id: trip._id,
                 message: Faker.lorem.sentence()
               })
               .then((createdStep) => {
                 step = createdStep
-                done()
               })
           })
 
@@ -131,10 +142,11 @@ describe('Steps', () => {
       describe('when the trip exists', () => {
         let trip, firstTripStep, secondTripStep
 
-        before((done) => {
+        beforeEach(() => {
           let name = Faker.lorem.sentence()
           let owner_id = mongoose.Types.ObjectId()
-          Trip.create({ name, owner_id })
+
+          return Trip.create({ name, owner_id })
             .then((createdTrip) => {
               trip = createdTrip
 
@@ -151,11 +163,8 @@ describe('Steps', () => {
                 message: Faker.lorem.sentence()
               }
 
-              Step
-                .create([firstTripStep, secondTripStep, otherTripStep])
-                .then((createdSteps) => {
-                  done()
-                })
+              return Step
+                .create([firstTripStep, secondTripStep, otherTripStep]);
             })
         })
 
@@ -183,19 +192,17 @@ describe('Steps', () => {
     describe(':create', () => {
       let userId, trip, token
 
-      before((done) => {
+      beforeEach(() => {
         userId = mongoose.Types.ObjectId()
-        new Trip({
+
+        token = shared.tokens.create(userId, '')
+
+        return Trip.create({
           name: Faker.lorem.sentence(10),
           owner_id: userId.toString()
-        }).save((e, createdTrip) => {
+        }).then((createdTrip) => {
           trip = createdTrip
-          done(e)
         })
-      })
-
-      beforeEach(() => {
-        token = shared.tokens.create(userId, '')
       })
 
       describe('when the user is not authenticated', () => {
@@ -314,18 +321,17 @@ describe('Steps', () => {
       })
 
       describe('when the trip exists', () => {
+
         let userId, trip
-        before((done) => {
+        beforeEach(() => {
           userId = mongoose.Types.ObjectId()
-          Trip.create({
+
+          return Trip.create({
             name: Faker.lorem.sentence(10),
             owner_id: userId.toString()
           }).then((createdTrip) => {
             trip = createdTrip
-            done()
-          }, (error) => {
-            done(error)
-          })
+          });
         })
 
         describe('but is not editable', () => {
@@ -344,7 +350,7 @@ describe('Steps', () => {
 
         describe('and it is editable', () => {
           let token
-          before(() => {
+          beforeEach(() => {
             token = shared.tokens.create(userId.toString(), '')
           })
 
@@ -361,13 +367,13 @@ describe('Steps', () => {
           })
 
           describe('and the step exists', () => {
+
             let step
-            beforeEach((done) => {
-              Step
+            beforeEach(() => {
+              return Step
                 .create({ message: Faker.lorem.sentence(10), trip_id: trip._id })
                 .then((createdStep) => {
                   step = createdStep
-                  done()
                 })
             })
 
@@ -388,16 +394,17 @@ describe('Steps', () => {
     describe(':updateOne', () => {
       let userId, trip, step, token
 
-      before((done) => {
+      beforeEach(() => {
         userId = mongoose.Types.ObjectId()
         token = shared.tokens.create(userId, '')
-        Trip.create({
+
+        return Trip.create({
           name: Faker.lorem.sentence(10),
           owner_id: userId.toString()
         }).then((createdTrip) => {
           trip = createdTrip
 
-          Step
+          return Step
             .create({
               message: Faker.lorem.sentence(10),
               trip_id: createdTrip._id,
@@ -405,10 +412,7 @@ describe('Steps', () => {
             })
             .then((createdStep) => {
               step = createdStep
-              done()
             })
-        }, (e) => {
-          done(e)
         })
       })
 
@@ -465,14 +469,13 @@ describe('Steps', () => {
 
           describe('and the step exists', () => {
             describe('but it is related to another trip', () => {
-              let step
 
-              before((done) => {
-                Step
+              let step
+              beforeEach(() => {
+                return Step
                   .create({ message: Faker.lorem.sentence(10), trip_id: mongoose.Types.ObjectId().toString() })
                   .then((createdStep) => {
                     step = createdStep
-                    done()
                   })
               })
 

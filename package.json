@@ -4,7 +4,8 @@
   "description": "On My Travel API",
   "main": "index.js",
   "scripts": {
-    "test": "NODE_ENV=test ./node_modules/mocha/bin/mocha --recursive",
+    "test": "NODE_ENV=test ./node_modules/mocha/bin/mocha --recursive --reporter dot",
+    "test:full": "NODE_ENV=test ./node_modules/mocha/bin/mocha --recursive",
     "test:watch": "NODE_ENV=test ./node_modules/mocha/bin/mocha --recursive --watch",
     "start": "node index.js"
   },
@@ -31,6 +32,7 @@
   "dependencies": {
     "bluebird": "^3.4.6",
     "body-parser": "^1.15.2",
+    "chai-as-promised": "^7.1.1",
     "chai-http": "^3.0.0",
     "config": "^1.24.0",
     "cors": "^2.8.4",
@@ -38,7 +40,7 @@
     "express": "^4.14.0",
     "http-status-codes": "^1.0.6",
     "jsonwebtoken": "^7.1.9",
-    "mongoose": "^4.13.9",
+    "mongoose": "^5.1.4",
     "morgan": "^1.9.0",
     "multer": "^1.2.1",
     "node-rest-client": "^2.0.1",
@@ -51,8 +53,7 @@
     "mocha": "^3.1.2",
     "nock": "^9.0.6",
     "node-mocks-http": "^1.5.4",
-    "proxyquire": "^1.7.10",
-    "sinon": "^1.17.6",
+    "sinon": "^5.0.9",
     "sinon-chai": "^2.8.0",
     "streamtest": "^1.2.2",
     "supertest": "^2.0.1"

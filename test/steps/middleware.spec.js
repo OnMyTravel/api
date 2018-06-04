@@ -1,186 +1,204 @@
-const proxyquire = require('proxyquire').noPreserveCache()
-const config = require('config')
-const sinon = require('sinon')
-const expect = require('chai').expect
-const mongoose = require('mongoose')
+const chai = require("chai");
+const sinon = require("sinon");
+const sinonChai = require("sinon-chai");
+chai.should();
+chai.use(sinonChai);
+
 const Faker = require('faker')
+const mongoose = require('mongoose')
 const httpMocks = require('node-mocks-http')
-const Step = require(config.get('app-folder') + '/steps/models/step')
 
-let stepMiddlewarePath = config.get('app-folder') + '/steps/middleware'
+const db = require('../../database')
+const Step = require('../../app/steps/models/step')
 
-const findByTripIdStepIdAndImageIdStub = sinon.stub()
-const stepMiddleware = require(stepMiddlewarePath)
-const stubStepMiddleware = proxyquire(stepMiddlewarePath, {
-  './repository': {
-    findByTripIdStepIdAndImageId: findByTripIdStepIdAndImageIdStub
-  }
-})
+const stepMiddleware = require('../../app/steps/middleware')
+const repository = require('../../app/steps/repository')
 
-describe('Step', () => {
-  describe('middleware', () => {
-    describe(':exists', () => {
-      describe('when the steps does not exist', () => {
-        it('should return NOT_FOUND', (done) => {
-          // Given
-          var next = sinon.spy()
-          let response = httpMocks.createResponse()
-          let request = httpMocks.createRequest({
-            url: '',
-            params: {
-              tripid: mongoose.Types.ObjectId().toString(),
-              stepid: mongoose.Types.ObjectId().toString()
-            }
-          })
+describe('Unit | Step | Middleware', () => {
 
-          // When
-          let middlewarePromise = stepMiddleware.exists(request, response, next)
+  let sandbox;
+  let connexion;
 
-          // Then
-          middlewarePromise.finally(() => {
-            next.should.not.have.been.called
-            response.statusCode.should.be.equal(404)
-            done()
-          })
-        })
-      })
+  before(() => {
+    connexion = db.openDatabaseConnexion();
+  })
 
-      describe('when the steps exists', () => {
-        let step_id, trip_id
-        before((done) => {
-          trip_id = mongoose.Types.ObjectId()
-          Step
-            .create({ trip_id, message: Faker.lorem.sentence() })
-            .then((step) => {
-              step_id = step._id
-              done()
-            })
-        })
+  after(() => {
+    connexion.close()
+  })
 
-        it('should call next', (done) => {
-          // Given
-          var next = sinon.spy()
-          let response = httpMocks.createResponse()
-          let request = httpMocks.createRequest({
-            url: '',
-            params: {
-              tripid: trip_id.toString(),
-              stepid: step_id.toString()
-            }
-          })
+  beforeEach(() => {
+    sandbox = sinon.createSandbox();
+    sandbox.stub(repository, 'findByTripIdAndStepId').resolves()
+    sandbox.stub(repository, 'findByTripIdStepIdAndImageId').resolves();
+  })
 
-          // When
-          let middlewarePromise = stepMiddleware.exists(request, response, next)
+  afterEach(() => {
+    sandbox.restore()
+  })
 
-          // Then
-          middlewarePromise.finally(() => {
-            next.should.have.been.called
-            done()
-          })
-        })
-      })
-    })
+  describe(':exists', () => {
 
-    describe(':handleUploadError', () => {
-      it('should return INTERNAL_SERVER_ERROR', () => {
+    describe('when the steps does not exist', () => {
+      it('should return NOT_FOUND', () => {
         // Given
-        let request = httpMocks.createRequest()
+        var next = sinon.spy()
         let response = httpMocks.createResponse()
-        let next = sinon.spy()
-        let err = {
-          error: "EACCES: permission denied, open 'uploads/2cb082bca6e6f47b9385e7c1cee755e6'",
-          errno: -13,
-          code: 'EACCES',
-          syscall: 'open',
-          path: 'uploads/2cb082bca6e6f47b9385e7c1cee755e6',
-          storageErrors: []
-        }
+        let request = httpMocks.createRequest({
+          url: '',
+          params: {
+            tripid: mongoose.Types.ObjectId().toString(),
+            stepid: mongoose.Types.ObjectId().toString()
+          }
+        })
 
         // When
-        stepMiddleware.handleUploadError(err, request, response, next)
-
-        next.should.not.have.been.called
-        response.statusCode.should.equal(500)
-        let data = JSON.parse(response._getData())
-        data.should.deep.equal(err)
-      })
-
-      it('should call next when there is no err', () => {
-        // Given
-        let next = sinon.spy()
-        let response = httpMocks.createResponse()
-        let request = httpMocks.createRequest({})
-
-        let err = null
-
-        // When
-        stepMiddleware.handleUploadError(err, request, response, next)
+        let middlewarePromise = stepMiddleware.exists(request, response, next)
 
         // Then
-        next.should.have.been.called
+        return middlewarePromise.then(() => {
+          next.should.not.have.been.called
+          response.statusCode.should.be.equal(404)
+        })
       })
     })
 
-    describe(':fileExists', () => {
-      it('should call next when the image exists', () => {
+    describe('when the steps exists', () => {
+
+      let step, trip_id
+      beforeEach(() => {
+        trip_id = mongoose.Types.ObjectId()
+        return Step
+          .create({ trip_id, message: Faker.lorem.sentence() })
+          .then((createdStep) => {
+            step = createdStep
+          })
+          .catch((e) => {
+            console.log('ER', e)
+          })
+      })
+
+      it('should call next', () => {
         // Given
+        repository.findByTripIdAndStepId.resolves(step)
+        var next = sinon.spy()
         let response = httpMocks.createResponse()
-        let request = httpMocks.createRequest({})
-        let nextSpy = sinon.spy()
-        findByTripIdStepIdAndImageIdStub.returns(Promise.resolve({}))
+        let request = httpMocks.createRequest({
+          url: '',
+          params: {
+            tripid: trip_id.toString(),
+            stepid: step._id.toString()
+          }
+        })
 
         // When
-        var promise = stubStepMiddleware.fileExists(request, response, nextSpy)
+        let middlewarePromise = stepMiddleware.exists(request, response, next)
+
+        // Then
+        return middlewarePromise.then(() => {
+          next.should.have.been.called
+        })
+      })
+    })
+  })
+
+  describe(':handleUploadError', () => {
+    it('should return INTERNAL_SERVER_ERROR', () => {
+      // Given
+      let request = httpMocks.createRequest()
+      let response = httpMocks.createResponse()
+      let next = sinon.spy()
+      let err = {
+        error: "EACCES: permission denied, open 'uploads/2cb082bca6e6f47b9385e7c1cee755e6'",
+        errno: -13,
+        code: 'EACCES',
+        syscall: 'open',
+        path: 'uploads/2cb082bca6e6f47b9385e7c1cee755e6',
+        storageErrors: []
+      }
+
+      // When
+      stepMiddleware.handleUploadError(err, request, response, next)
+
+      next.should.not.have.been.called
+      response.statusCode.should.equal(500)
+      let data = JSON.parse(response._getData())
+      data.should.deep.equal(err)
+    })
+
+    it('should call next when there is no err', () => {
+      // Given
+      let next = sinon.spy()
+      let response = httpMocks.createResponse()
+      let request = httpMocks.createRequest({})
+
+      let err = null
+
+      // When
+      stepMiddleware.handleUploadError(err, request, response, next)
+
+      // Then
+      next.should.have.been.called
+    })
+  })
+
+  describe(':fileExists', () => {
+    it('should call next when the image exists', () => {
+      // Given
+      repository.findByTripIdStepIdAndImageId.resolves({})
+      let response = httpMocks.createResponse()
+      let request = httpMocks.createRequest({})
+      let nextSpy = sinon.spy()
+
+      // When
+      const promise = stepMiddleware.fileExists(request, response, nextSpy)
+
+      // Then
+      return promise.then(() => {
+        nextSpy.should.have.been.called
+      })
+    })
+
+    describe('when the resource does not exist', () => {
+      it('should not call next', () => {
+        // Given
+        let tripid = mongoose.Types.ObjectId().toString()
+        let stepid = mongoose.Types.ObjectId().toString()
+        let imageSource = mongoose.Types.ObjectId().toString()
+
+        let nextSpy = sinon.spy()
+        let response = httpMocks.createResponse()
+        let request = httpMocks.createRequest({
+          params: { tripid, stepid, imageid: imageSource }
+        })
+
+        // When
+        const promise = stepMiddleware.fileExists(request, response, nextSpy)
 
         // Then
         return promise.then(() => {
-          nextSpy.should.have.been.called
+          repository.findByTripIdStepIdAndImageId.should.have.been.calledWith(tripid, stepid, imageSource)
+          nextSpy.should.not.have.been.called
         })
       })
 
-      describe('when the resource does not exist', () => {
-        it('should not call next', () => {
-          // Given
-          findByTripIdStepIdAndImageIdStub.returns(Promise.resolve(null))
-          let tripid = mongoose.Types.ObjectId().toString()
-          let stepid = mongoose.Types.ObjectId().toString()
-          let imageSource = mongoose.Types.ObjectId().toString()
-
-          let nextSpy = sinon.spy()
-          let response = httpMocks.createResponse()
-          let request = httpMocks.createRequest({
-            params: { tripid, stepid, imageid: imageSource }
-          })
-
-          // When
-          var promise = stubStepMiddleware.fileExists(request, response, nextSpy)
-
-          // Then
-          return promise.then(() => {
-            findByTripIdStepIdAndImageIdStub.should.have.been.calledWith(tripid, stepid, imageSource)
-            nextSpy.should.not.have.been.called
-          })
+      it('should return a 404 error', () => {
+        // Given
+        let response = httpMocks.createResponse()
+        let request = httpMocks.createRequest({
+          params: {
+            tripid: mongoose.Types.ObjectId().toString(),
+            stepid: mongoose.Types.ObjectId().toString(),
+            imageid: mongoose.Types.ObjectId().toString()
+          }
         })
 
-        it('should return a 404 error', () => {
-          // Given
-          findByTripIdStepIdAndImageIdStub.returns(Promise.resolve(null))
-          let response = httpMocks.createResponse()
-          let request = httpMocks.createRequest({
-            params: {
-              tripid: mongoose.Types.ObjectId().toString(),
-              stepid: mongoose.Types.ObjectId().toString(),
-              imageid: mongoose.Types.ObjectId().toString()
-            }
-          })
+        // When
+        const promise = stepMiddleware.fileExists(request, response, sinon.spy())
 
-          // When
-          var promise = stubStepMiddleware.fileExists(request, response, sinon.spy())
-
-          // Then
-          return promise.then(() => {
-            response.statusCode.should.be.equal(404)
-          })
+        // Then
+        return promise.then(() => {
+          response.statusCode.should.be.equal(404)
         })
       })
     })

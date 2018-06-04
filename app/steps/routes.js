@@ -10,7 +10,7 @@ const trip = require('../trips/middleware')
 const upload = require('multer')({ dest: 'uploads/' })
 
 // Routes
-router.get('/', trip.exists, controller.get)
+router.get('/', trip.exists, controller.get)  
 router.post('/', isAuthenticated, trip.existsAndIsEditable, controller.create)
 router.post('/:stepid/attach', isAuthenticated, trip.existsAndIsEditable, step.exists,
   upload.single('picture'), step.handleUploadError, controller.attach)

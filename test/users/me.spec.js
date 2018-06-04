@@ -1,4 +1,5 @@
-const app = require(require('config').get('app-root') + '/index')
+const app = require('../../app/index')
+const db = require('../../database')
 const faker = require('faker')
 const User = require(require('config').get('app-folder') + '/users/model')
 const httpStatus = require('http-status-codes')
@@ -12,6 +13,16 @@ chai.should()
 chai.use(chaiHttp)
 
 describe('Users', () => {
+
+  let connexion
+  beforeEach(() => {
+    connexion = db.openDatabaseConnexion();
+  })
+
+  afterEach(() => {
+    connexion.close()
+  })
+
   describe('/me', () => {
     describe('when the access token is not provided', () => {
       it('should require to be authenticated', (done) => {

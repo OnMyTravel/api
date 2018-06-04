@@ -1,157 +1,214 @@
-require('chai').should()
+const chai = require("chai");
+const sinon = require("sinon");
+const sinonChai = require("sinon-chai");
+chai.should();
+chai.use(sinonChai);
+
+const TripController = require('../../app/trips/controller');
 
 const config = require('config')
-const sinon = require('sinon')
 const mongoose = require('mongoose')
-const proxyquire = require('proxyquire').noPreserveCache()
 const httpMocks = require('node-mocks-http')
-const shared = require(config.get('app-folder') + '/shared')
+
+const shared = require('../../app/shared')
+const tripRepository = require('../../app/trips/repository')
+const stepRepository = require('../../app/steps/repository')
 
 const TRIP_ID = 1234567
 const TRIP = { _id: TRIP_ID, name: 'My super trip' }
-let createContainerStub = sinon.stub()
-createContainerStub.withArgs(TRIP_ID).returns(new Promise((resolve, reject) => { resolve() }))
-let destroyContainerStub = sinon.stub()
 
-let deleteByIdStub = sinon.stub()
-let deleteByTripIdStub = sinon.stub()
-let mocks = {
-  '../shared': {
-    containers: {
-      create: createContainerStub,
-      destroy: destroyContainerStub
-    }
-  },
-  './repository': {
-    create: sinon.stub().returns(new Promise((resolve, reject) => { resolve(TRIP) })),
-    deleteById: deleteByIdStub
-  },
-  '../steps/repository': {
-    deleteByTripId: deleteByTripIdStub
-  }
-}
 
-const TripController = proxyquire(config.get('app-folder') + '/trips/controller', mocks)
+describe('Unit | Trip | Controller', () => {
+  describe(':create', () => {
 
-describe('Trip', () => {
-  describe('controller', () => {
-    describe(':create', () => {
-      it('checks sanity', () => {
-        TripController.create.should.be.defined
-      })
+    const sandbox = sinon.createSandbox();
+    
+    beforeEach(() => {
+      sandbox.stub(shared.containers, 'create').resolves()
+      sandbox.stub(tripRepository, 'create').resolves(TRIP)
+    });
 
-      describe('when containers creation is OK', () => {
-        let response, request, token, userId
+    afterEach(() => {
+      sandbox.restore();
+    });
 
-        beforeEach(() => {
-          userId = mongoose.Types.ObjectId()
-          token = shared.tokens.create(userId, '')
-          response = httpMocks.createResponse()
-          request = httpMocks.createRequest({
-            method: 'POST',
-            url: '/trips',
-            headers: {
-              'authorization': 'Bearer ' + token.toString()
-            },
-            body: TRIP
-          })
-        })
+    it('checks sanity', () => {
+      TripController.create.should.be.defined
+    })
 
-        it('should create a container', () => {
-          // When
-          let t = TripController.create(request, response)
+    describe('when containers creation is OK', () => {
+      let response, request, token, userId
 
-          // Then
-          return t.then(() => {
-            createContainerStub.should.have.been.calledWith(TRIP_ID)
-            response.statusCode.should.equal(201)
-          })
-        })
-
-        it('should return payload', () => {
-          // When
-          let t = TripController.create(request, response)
-
-          // Then
-          return t.then(() => {
-            createContainerStub.should.have.been.calledWith(TRIP_ID)
-            response.statusCode.should.equal(201)
-
-            let responseBody = JSON.parse(response._getData())
-            responseBody._id.should.equal(TRIP_ID)
-            responseBody.owner_id.should.equal(userId.toString())
-            responseBody.name.should.equal('My super trip')
-          })
+      beforeEach(() => {
+        userId = mongoose.Types.ObjectId()
+        token = shared.tokens.create(userId, '')
+        response = httpMocks.createResponse()
+        request = httpMocks.createRequest({
+          method: 'POST',
+          url: '/trips',
+          headers: {
+            'authorization': 'Bearer ' + token.toString()
+          },
+          body: TRIP
         })
       })
 
-      describe('when containers creation failed', () => {
-        before(() => {
-          createContainerStub.reset();
-          createContainerStub.withArgs(TRIP_ID).returns(new Promise((resolve, reject) => { reject() }))
-        });
+      it('should create a container', () => {
+        // When
+        let t = TripController.create(request, response)
 
-        it('should return a bad gateway', () => {
-          // Given
-          let response = httpMocks.createResponse();
-          let request = httpMocks.createRequest({
-            method: 'POST',
-            url: '/trips',
-            headers: {
-              'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU4NjY5MzdkMzQ3NjYxNzY0MzY0ZmNmOCIsImZhY2Vib29rX2FjY2Vzc190b2tlbiI6IkVBQUNFZEVvc2UwY0JBRTI2VzJmM3M0QVpDUFNpSmNMZkNHTmd1SGVNME9jdUdXU1NWOTBPeE9OdHh5clg0TUZrakVkOVpBbko3NTVXN0NFYUhCYlpCY1lqcllaQkRVUnlwYWtsazJsQWtJR2Q3RlA2QWV2eFF2OWVFU0xveW5xSUtMZkxFbUFWaGRGV2loaGxPOEg5aGtSZEFtYk93M1pDU3Fmc1pBWkFmQnl4d1pEWkQiLCJpYXQiOjE0ODUxNjEzOTUsImV4cCI6MTQ4NTE2NDk5NX0.b4UaaskpGlWxVAcFsFKl3cUhstszER6cxUrCWUaqRik'
-            }
-          });
+        // Then
+        return t.then(() => {
+          shared.containers.create.should.have.been.calledWith(TRIP_ID)
+          response.statusCode.should.equal(201)
+        })
+      })
 
-          // When
-          let t = TripController.create(request, response);
+      it('should return payload', () => {
+        // When
+        let t = TripController.create(request, response)
 
-          // Then
-          return t.then(() => {
-            createContainerStub.should.have.been.calledWith(TRIP_ID);
-            response.statusCode.should.equal(502);
-          })
+        // Then
+        return t.then(() => {
+          shared.containers.create.should.have.been.calledWith(TRIP_ID)
+          response.statusCode.should.equal(201)
+
+          let responseBody = JSON.parse(response._getData())
+          responseBody._id.should.equal(TRIP_ID)
+          responseBody.owner_id.should.equal(userId.toString())
+          responseBody.name.should.equal('My super trip')
         })
       })
     })
 
-    describe(':deleteOne', () => {
-      let response, request
-
+    describe('when containers creation failed', () => {
       beforeEach(() => {
-        response = httpMocks.createResponse()
-        request = httpMocks.createRequest({
-          method: 'DELETE',
-          url: '/trips/58bea7087947bd35daea1d93',
-          params: {
-            tripid: '58bea7087947bd35daea1d93'
+        shared.containers.create.withArgs(TRIP_ID).rejects();
+      });
+
+      it('should return a bad gateway', () => {
+        // Given
+        let response = httpMocks.createResponse();
+        let request = httpMocks.createRequest({
+          method: 'POST',
+          url: '/trips',
+          headers: {
+            'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU4NjY5MzdkMzQ3NjYxNzY0MzY0ZmNmOCIsImZhY2Vib29rX2FjY2Vzc190b2tlbiI6IkVBQUNFZEVvc2UwY0JBRTI2VzJmM3M0QVpDUFNpSmNMZkNHTmd1SGVNME9jdUdXU1NWOTBPeE9OdHh5clg0TUZrakVkOVpBbko3NTVXN0NFYUhCYlpCY1lqcllaQkRVUnlwYWtsazJsQWtJR2Q3RlA2QWV2eFF2OWVFU0xveW5xSUtMZkxFbUFWaGRGV2loaGxPOEg5aGtSZEFtYk93M1pDU3Fmc1pBWkFmQnl4d1pEWkQiLCJpYXQiOjE0ODUxNjEzOTUsImV4cCI6MTQ4NTE2NDk5NX0.b4UaaskpGlWxVAcFsFKl3cUhstszER6cxUrCWUaqRik'
           }
+        });
+
+        // When
+        let t = TripController.create(request, response);
+
+        // Then
+        return t.then(() => {
+          shared.containers.create.should.have.been.calledWith(TRIP_ID);
+          response.statusCode.should.equal(502);
         })
+      })
+    })
+  })
 
-        destroyContainerStub.returns(Promise.resolve())
-        deleteByIdStub.returns(Promise.resolve())
-        deleteByTripIdStub.reset()
-        destroyContainerStub.reset()
-        deleteByIdStub.reset()
+  describe(':deleteOne', () => {
+    let response, request
+    const sandbox = sinon.createSandbox();
+
+    beforeEach(() => {
+      response = httpMocks.createResponse()
+      request = httpMocks.createRequest({
+        method: 'DELETE',
+        url: '/trips/58bea7087947bd35daea1d93',
+        params: {
+          tripid: '58bea7087947bd35daea1d93'
+        }
       })
 
-      it('checks sanity', () => {
-        TripController.deleteOne.should.be.defined
-      })
+      sandbox.stub(shared.containers, 'create')
+      sandbox.stub(shared.containers, 'destroy').resolves()
+      sandbox.stub(tripRepository, 'deleteById').resolves()
+      sandbox.stub(stepRepository, 'deleteByTripId').resolves()
+    })
 
-      it('should destroy its container', () => {
+    afterEach(() => {
+      sandbox.restore();
+    });
+
+    it('checks sanity', () => {
+      TripController.deleteOne.should.be.defined
+    })
+
+    it('should destroy its container', () => {
+      // When
+      let promise = TripController.deleteOne(request, response)
+
+      // Then
+      return promise.then(() => {
+        shared.containers.destroy.should.have.been.called;
+        shared.containers.destroy.should.to.have.been.calledWith('58bea7087947bd35daea1d93');
+      })
+    })
+
+    describe('when we cannot destroy container', () => {
+      it('should return INTERNAL_SERVER_ERROR', () => {
+        // Given
+        shared.containers.destroy.rejects()
+
         // When
         let promise = TripController.deleteOne(request, response)
 
         // Then
         return promise.then(() => {
-          destroyContainerStub.should.have.been.calledWith('58bea7087947bd35daea1d93')
+          response.statusCode.should.equal(500)
+          response.getHeader('Content-Type').should.equal('application/json')
+
+          tripRepository.deleteById.should.not.have.been.called
+          tripRepository.deleteById.should.not.have.been.called
+        })
+      })
+    })
+
+    describe('when we destroyed container', () => {
+      it('should remove trip', () => {
+        // When
+        let promise = TripController.deleteOne(request, response)
+
+        // Then
+        return promise.then(() => {
+          tripRepository.deleteById.should.have.been.calledWith('58bea7087947bd35daea1d93')
         })
       })
 
-      describe('when we cannot destroy container', () => {
-        it('should return INTERNAL_SERVER_ERROR', () => {
+      it('should return INTERNAL_SERVER_ERROR in case of error', () => {
+        // Given
+        tripRepository.deleteById.returns(Promise.reject())
+
+        // When
+        let promise = TripController.deleteOne(request, response)
+
+        // Then
+        return promise.then(() => {
+          stepRepository.deleteByTripId.should.not.have.been.called
+          response.statusCode.should.equal(500)
+          response.getHeader('Content-Type').should.equal('application/json')
+        })
+      })
+
+      describe('when we removed trip in database', () => {
+        it('should remove step', () => {
+          // When
+          let promise = TripController.deleteOne(request, response)
+
+          // Then
+          return promise.then(() => {
+            stepRepository.deleteByTripId.should.have.been.calledWith('58bea7087947bd35daea1d93')
+            response.statusCode.should.equal(200)
+            response.getHeader('Content-Type').should.equal('application/json')
+          })
+        })
+
+        it('should return INTERNAL_SERVER_ERROR in case of error removing a step', () => {
           // Given
-          destroyContainerStub.returns(Promise.reject())
+          stepRepository.deleteByTripId.returns(Promise.reject())
 
           // When
           let promise = TripController.deleteOne(request, response)
@@ -160,64 +217,6 @@ describe('Trip', () => {
           return promise.then(() => {
             response.statusCode.should.equal(500)
             response.getHeader('Content-Type').should.equal('application/json')
-
-            deleteByIdStub.should.not.have.been.called
-            deleteByTripIdStub.should.not.have.been.called
-          })
-        })
-      })
-
-      describe('when we destroyed container', () => {
-        it('should remove trip', () => {
-          // When
-          let promise = TripController.deleteOne(request, response)
-
-          // Then
-          return promise.then(() => {
-            deleteByIdStub.should.have.been.calledWith('58bea7087947bd35daea1d93')
-          })
-        })
-
-        it('should return INTERNAL_SERVER_ERROR in case of error', () => {
-          // Given
-          deleteByIdStub.returns(Promise.reject())
-
-          // When
-          let promise = TripController.deleteOne(request, response)
-
-          // Then
-          return promise.then(() => {
-            deleteByTripIdStub.should.not.have.been.called
-            response.statusCode.should.equal(500)
-            response.getHeader('Content-Type').should.equal('application/json')
-          })
-        })
-
-        describe('when we removed trip in database', () => {
-          it('should remove step', () => {
-            // When
-            let promise = TripController.deleteOne(request, response)
-
-            // Then
-            return promise.then(() => {
-              deleteByTripIdStub.should.have.been.calledWith('58bea7087947bd35daea1d93')
-              response.statusCode.should.equal(200)
-              response.getHeader('Content-Type').should.equal('application/json')
-            })
-          })
-
-          it('should return INTERNAL_SERVER_ERROR in case of error removing a step', () => {
-            // Given
-            deleteByTripIdStub.returns(Promise.reject())
-
-            // When
-            let promise = TripController.deleteOne(request, response)
-
-            // Then
-            return promise.then(() => {
-              response.statusCode.should.equal(500)
-              response.getHeader('Content-Type').should.equal('application/json')
-            })
           })
         })
       })

@@ -1,5 +1,6 @@
 /* global describe, it, before */
-const app = require('../../index');
+const app = require('../../app/index');
+const db = require('../../database');
 const Faker = require('faker');
 const Trip = require('../../app/trips/model');
 const shared = require('../../app/shared');
@@ -11,7 +12,17 @@ const mongoose = require('mongoose');
 chai.should();
 chai.use(chaiHttp);
 
-describe('Trips', function () {
+describe('Functional | Trips', function () {
+
+  let dbConnexion;
+  before(() => {
+    dbConnexion = db.openDatabaseConnexion()
+  })
+
+  after(() => {
+    dbConnexion.close()
+  })
+
   describe('controller', function () {
     describe(':getAll', () => {
       describe('when the user is not authenticated', () => {
@@ -28,16 +39,14 @@ describe('Trips', function () {
       describe('when the user has correctly authenticated himself', () => {
         let token, userId, expectedTrip
 
-        before(function (done) {
+        beforeEach(() => {
           userId = mongoose.Types.ObjectId()
           expectedTrip = {
             name: Faker.lorem.sentence(10),
             owner_id: userId.toString()
           }
 
-          new Trip(expectedTrip).save((err, data) => {
-            done(err)
-          })
+          return Trip.create(expectedTrip);
         })
 
         describe('when the database access is on error', () => {
@@ -57,7 +66,7 @@ describe('Trips', function () {
         })
 
         describe('when there is one trip', () => {
-          before(() => {
+          beforeEach(() => {
             token = shared.tokens.create(userId, '')
           })
 
@@ -146,13 +155,15 @@ describe('Trips', function () {
     });
 
     describe(':getOne', () => {
+
       let trip, userId
-      before((done) => {
+      beforeEach(() => {
         userId = mongoose.Types.ObjectId()
-        Trip.create({ name: Faker.lorem.sentence(10), owner_id: userId.toString() }, (err, createdTrip) => {
-          trip = createdTrip
-          done(err)
-        })
+        return Trip
+          .create({ name: Faker.lorem.sentence(10), owner_id: userId.toString() })
+          .then((createdTrip) => {
+            trip = createdTrip
+          })
       })
 
       it('should return 200 when the trip exists', (done) => {
@@ -176,13 +187,15 @@ describe('Trips', function () {
     })
 
     describe(':updateOne', () => {
+
       let trip, userId
-      before((done) => {
+      beforeEach(() => {
         userId = mongoose.Types.ObjectId()
-        Trip.create({ name: Faker.lorem.sentence(10), owner_id: userId.toString() }, (err, createdTrip) => {
-          trip = createdTrip
-          done(err)
-        })
+        return Trip
+          .create({ name: Faker.lorem.sentence(10), owner_id: userId.toString() })
+          .then((createdTrip) => {
+            trip = createdTrip
+          })
       })
 
       describe('when the user is not authenticated', () => {
@@ -215,7 +228,7 @@ describe('Trips', function () {
 
       describe('when the user does not exist', () => {
         let token
-        before(() => {
+        beforeEach(() => {
           token = shared.tokens.create(mongoose.Types.ObjectId(), '')
         })
 
@@ -232,7 +245,7 @@ describe('Trips', function () {
 
       describe('when the user is the trip\'s owner', () => {
         let token
-        before(() => {
+        beforeEach(() => {
           token = shared.tokens.create(userId, '')
         })
 
@@ -267,14 +280,16 @@ describe('Trips', function () {
     })
 
     describe(':deleteOne', () => {
+
       let userId, trip, token
-      beforeEach((done) => {
+      beforeEach(() => {
         userId = mongoose.Types.ObjectId().toString()
         token = shared.tokens.create(userId, '')
-        Trip.create({ name: Faker.lorem.sentence(10), owner_id: userId }, (err, createdTrip) => {
-          trip = createdTrip
-          done(err)
-        })
+        return Trip
+          .create({ name: Faker.lorem.sentence(10), owner_id: userId })
+          .then((createdTrip) => {
+            trip = createdTrip
+          })
       })
 
       describe('when the user is not connected', () => {

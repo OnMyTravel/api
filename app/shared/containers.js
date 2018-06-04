@@ -4,9 +4,9 @@ const pkgcloud = require('pkgcloud')
 const ContainerError = require('./errors').ContainerError
 
 function create (tripId) {
-  let client = pkgcloud.storage.createClient(config.get('storage'))
-
   return new Promise((resolve, reject) => {
+    let client = pkgcloud.storage.createClient(config.get('storage'))
+
     client.createContainer({ name: tripId }, (error, container) => {
       if (error) {
         reject(new ContainerError(error.message))

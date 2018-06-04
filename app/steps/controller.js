@@ -38,16 +38,16 @@ function deleteOne (req, res) {
           promises.push(shared.containers.deleteFile(req.params.tripid, image.source))
         })
 
-        repository
-          .deleteById(req.params.stepid)
-          .then(() => {
-            res.json()
-          })
-
-        return Promise
+        Promise
           .all(promises)
           .catch((error) => {
             winston.error(error)
+          })
+
+        return repository
+          .deleteById(req.params.stepid)
+          .then(() => {
+            res.json()
           })
       } else {
         res.status(statusCode.NOT_FOUND).json()

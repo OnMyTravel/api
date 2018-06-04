@@ -2,7 +2,8 @@ const nock = require('nock')
 const faker = require('faker')
 const config = require('config')
 const facebookResponses = require('./facebook.errors')
-const app = require(config.get('app-root') + '/index')
+const app = require('../../app/index')
+const db = require('../../database')
 const User = require(config.get('app-folder') + '/users/model')
 
 const httpStatus = require('http-status-codes')
@@ -16,7 +17,21 @@ chai.use(chaiHttp)
 const ALLOWEDTOKEN = 'EAACEdEose0cBAKLLwLKSXjs2Xrgd4LdSermEQMhbhUo3qAl8hmj98hB0'
 const UNAUTHORIZEDTOKEN = 'EAACEdEose0cBAM8BlABqcgQlCIZCZAZAJgW60opqGtC3iIfg2gZBp6oC'
 
-describe('Users', () => {
+describe('Functionnal | Users', () => {
+
+  let connexion;
+  before(() => {
+    connexion = db.openDatabaseConnexion()
+  })
+
+  after(() => {
+    connexion.close()
+  })
+
+  afterEach(() => {
+    return User.remove({})
+  })
+
   describe('/users/register/facebook', () => {
     describe('when facebook token is wrong', () => {
       beforeEach(() => {
@@ -56,19 +71,22 @@ describe('Users', () => {
     describe('when the account already exists', () => {
       let user, userData
 
-      beforeEach((done) => {
-        User.remove({}).exec()
+      beforeEach(() => {
+
         userData = {
           name: faker.name.findName(),
           email: faker.internet.email(),
           id_facebook: '1234567891'
         }
-        user = new User(userData)
+        return User.create(userData)
+          .then(createdUser => {
+            user = createdUser;
+            mockHttpAnswser(facebookResponses.OK, ALLOWEDTOKEN)
+          })
+      })
 
-        user.save(() => {
-          done()
-        })
-        mockHttpAnswser(facebookResponses.OK, ALLOWEDTOKEN)
+      afterEach(() => {
+        User.remove({}).exec();
       })
 
       it('should return an encrypted token', (done) => {
@@ -90,6 +108,9 @@ describe('Users', () => {
     describe('when the facebook ID is not registered', () => {
       beforeEach(() => {
         mockHttpAnswser(facebookResponses.OK, ALLOWEDTOKEN)
+      })
+
+      afterEach(() => {
         User.remove({ id_facebook: '1234567891' }).exec()
       })
 
@@ -118,8 +139,8 @@ describe('Users', () => {
   })
 })
 
-function mockHttpAnswser (answer, token) {
-  nock('https://graph.facebook.com', {reqheaders: { 'authorization': 'Bearer ' + token }})
+function mockHttpAnswser(answer, token) {
+  nock('https://graph.facebook.com', { reqheaders: { 'authorization': 'Bearer ' + token } })
     .get('/v2.8/me?fields=id%2Cname%2Cemail')
     .reply(answer.status, answer.body)
 }

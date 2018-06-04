@@ -1,40 +1,54 @@
-const sinon = require('sinon')
-const config = require('config')
-const proxyquire = require('proxyquire').noPreserveCache()
-const chai = require('chai')
-chai.should()
+// const chai = require("chai");
+// const sinon = require("sinon");
+// const sinonChai = require("sinon-chai");
+// const chaiHttp = require('chai-http');
+// chai.should();
+// chai.use(chaiHttp);
+// chai.use(sinonChai);
 
-let getStub = sinon.stub()
-let getImageStub = sinon.stub()
-let fileExistsStub = sinon.stub()
+// const config = require('config')
 
-let mocks = {
-  'express': {
-    Router: sinon.stub().returns({
-      get: getStub,
-      post: sinon.stub(),
-      delete: sinon.stub(),
-      put: sinon.stub()
-    })
-  },
+// let getStub = sinon.stub()
 
-  './controller': {
-    getImage: getImageStub
-  },
+// const express = require('express')
 
-  './middleware': {
-    fileExists: fileExistsStub
-  }
-}
+// const router = require('../../app/steps/routes')
+// const controller = require('../../app/steps/controller')
+// const middleware = require('../../app/steps/middleware')
 
-proxyquire(config.get('app-folder') + '/steps/routes', mocks)
+// describe('Integration | Steps', () => {
+//   describe('Routes', () => {
+//     describe('/:stepid/image/:imageid', () => {
 
-describe('Steps', () => {
-  describe('Routes', () => {
-    describe('/:stepid/image/:imageid', () => {
-      it('should exists', () => {
-        getStub.should.have.been.calledWith('/:stepid/images/:imageid', fileExistsStub, getImageStub)
-      })
-    })
-  })
-})
+//       let sandbox;
+//       beforeEach(() => {
+//         sandbox = sinon.createSandbox()
+//         sandbox.stub(express, 'Router').returns({
+//           get: getStub,
+//           post: sinon.stub(),
+//           delete: sinon.stub(),
+//           put: sinon.stub()
+//         });
+
+//         sandbox.stub(controller, 'getImage')
+//         sandbox.stub(middleware, 'fileExists')
+//       })
+
+//       afterEach(() => {
+//         sandbox.restore()
+//       })
+
+//       it('should', (done) => {
+//         chai.request(router)
+//           .get('/52456/images/2567')
+//           .end(() => {
+//             done()
+//           })
+//       })
+
+//       it('should exists', () => {
+//         getStub.should.have.been.calledWith('/:stepid/images/:imageid', middleware.fileExists, controller.getImage)
+//       })
+//     })
+//   })
+// })

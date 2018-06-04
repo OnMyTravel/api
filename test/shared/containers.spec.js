@@ -1,16 +1,13 @@
 const shared = require('../../app/shared')
-const proxyquire = require('proxyquire').noPreserveCache()
 const httpMocks = require('node-mocks-http')
 
 const StreamTest = require('streamtest')['v2']
 const faker = require('faker')
-const chai = require('chai')
-const sinon = require('sinon')
-chai.should()
-
-let createContainerStub = sinon.stub()
-createContainerStub.withArgs({ name: 'tripOnSuccess' }).callsArgWith(1, null, { message: 'SUCCESS' })
-createContainerStub.withArgs({ name: 'tripOnError' }).callsArgWith(1, { message: 'FAILURE' }, null)
+const chai = require("chai");
+const sinon = require("sinon");
+const sinonChai = require("sinon-chai");
+chai.should();
+chai.use(sinonChai);
 
 const storageConfig = {
   'provider': 'openstack',
@@ -21,50 +18,42 @@ const storageConfig = {
   'region': 'REG1'
 }
 
-let uploadStub = sinon.stub()
-let downloadStub = sinon.stub()
-let removeFileStub = sinon.stub()
-let destroyContainerStub = sinon.stub()
-let createClientStub = sinon.stub()
-createClientStub.returns({
-  createContainer: createContainerStub,
-  upload: uploadStub,
-  download: downloadStub,
-  removeFile: removeFileStub,
-  destroyContainer: destroyContainerStub
-})
-
-var pkgcloudStub = {
-  storage: {
-    createClient: createClientStub
-  }
-}
-
 const FILE_THAT_DOES_NOT_EXIST = 'foo.jpg'
 const FILE_THAT_EXISTS = 'bar/baz.jpg'
+
+const pkgcloud = require('pkgcloud')
+const config = require('config')
 
 let configGetStub = sinon.stub().withArgs('storage').returns(storageConfig)
 let createReadStreamStub = sinon.stub()
 
-const containers = proxyquire('../../app/shared/containers', {
-  'pkgcloud': pkgcloudStub,
-  'config': {
-    get: configGetStub
-  },
-  'fs': {
-    'createReadStream': createReadStreamStub
-  }
-})
+const containers = require('../../app/shared/containers');
 
-describe('Shared', () => {
+describe('Unit | Shared', () => {
   describe('containers', () => {
+
+    const sandbox = sinon.createSandbox();
+    let createClientStub
+
     beforeEach(() => {
-      createClientStub.reset()
-      uploadStub.reset()
-      downloadStub.reset()
-      removeFileStub.reset()
-      destroyContainerStub.reset()
+      createClientStub = {
+        createContainer: sinon.stub(),
+        upload: sinon.stub(),
+        download: sinon.stub(),
+        removeFile: sinon.stub(),
+        destroyContainer: sinon.stub(),
+      }
+
+      sandbox
+        .stub(pkgcloud.storage, 'createClient')
+        .returns(createClientStub);
+
+        sandbox.stub(config, 'get').withArgs('storage').returns(storageConfig)
     })
+
+    afterEach(() => (
+      sandbox.restore()
+    ))
 
     it('checks sanity', () => {
       shared.containers.should.be.defined
@@ -83,7 +72,7 @@ describe('Shared', () => {
         containers.create(tripId)
 
         // Then
-        createClientStub.should.have.been.calledWith(storageConfig)
+        pkgcloud.storage.createClient.should.have.been.calledWith(storageConfig)
       })
 
       it('should use create a container', () => {
@@ -94,29 +83,33 @@ describe('Shared', () => {
         containers.create(tripId)
 
         // Then
-        createContainerStub.should.have.been.calledWith({ name: tripId })
+        createClientStub.createContainer.should.have.been.calledWith({ name: tripId })
       })
 
-      it('should return a resolved promise with the container', (done) => {
+      it('should return a resolved promise with the container', () => {
         // Given
+        const containerDetails = { id: 'container-on-success' }
+        createClientStub.createContainer.yields(null, containerDetails)
         let tripId = 'tripOnSuccess'
 
         // When
-        containers
+        const promise = containers
           .create(tripId)
-          .then((container) => {
-            container.should.deep.equal({ message: 'SUCCESS' })
-            done()
-          }, () => {
-            done(new Error('Should not be on error'))
-          })
+
 
         // Then
-        createContainerStub.should.have.been.calledWith({ name: tripId })
-      })
+        return promise.then((container) => {
+            container.should.deep.equal(containerDetails)
+            createClientStub.createContainer.should.have.been.calledWith({ name: tripId })
+          }, () => {
+            throw new Error('Should not be on error')
+          })
+      });
 
       it('should return a rejected promise with the error', () => {
         // Given
+        const error = new Error('container-creation-on-failure')
+        createClientStub.createContainer.yields(error, null)
         let tripId = 'tripOnError'
 
         // When
@@ -127,8 +120,8 @@ describe('Shared', () => {
           container.should.be.undefined
         }, (error) => {
           error.should.be.an.instanceof(shared.errors.classes.ContainerError)
-          error.message.should.deep.equal('FAILURE')
-          createContainerStub.should.have.been.calledWith({ name: tripId })
+          error.message.should.deep.equal('container-creation-on-failure')
+          createClientStub.createContainer.should.have.been.calledWith({ name: tripId })
         })
       })
     })
@@ -148,13 +141,13 @@ describe('Shared', () => {
       let erroredReadableStream, readableStream, writableStream
       beforeEach(() => {
         writableStream = StreamTest.toChunks(() => {})
-        readableStream = StreamTest.fromChunks([new Buffer('file')])
+        readableStream = StreamTest.fromChunks([Buffer.from('file')])
         erroredReadableStream = StreamTest.fromErroredChunks(
           new Error('ENOENT: no such file or directory, open \'foo.jpg\''),
-          [new Buffer('file')]
+          [Buffer.from('file')]
         )
 
-        uploadStub.returns(writableStream)
+        createClientStub.upload.returns(writableStream)
 
         createReadStreamStub
           .withArgs(FILE_THAT_DOES_NOT_EXIST)
@@ -192,8 +185,8 @@ describe('Shared', () => {
 
         // Then
         return prom.then(() => {
-          createClientStub.should.have.been.called
-          createClientStub.should.have.been.calledWith(storageConfig)
+          pkgcloud.storage.createClient.should.have.been.called
+          pkgcloud.storage.createClient.should.have.been.calledWith(storageConfig)
         })
       })
 
@@ -206,7 +199,7 @@ describe('Shared', () => {
 
         // Then
         return prom.then(() => {
-          uploadStub.should.have.been.calledWith({
+          createClientStub.upload.should.have.been.calledWith({
             container: TRIP_ID,
             remote: FILE_INFOS.name,
             contentType: FILE_INFOS.mime
@@ -260,7 +253,7 @@ describe('Shared', () => {
         containers.download()
 
         // Then
-        createClientStub.should.have.been.calledWith(storageConfig)
+        pkgcloud.storage.createClient.should.have.been.calledWith(storageConfig)
       })
 
       it('should call download', () => {
@@ -273,7 +266,7 @@ describe('Shared', () => {
         containers.download(tripId, filename, response)
 
         // Then
-        downloadStub.should.have.been.calledWith({
+        createClientStub.download.should.have.been.calledWith({
           container: tripId,
           remote: filename,
           stream: response
@@ -288,20 +281,20 @@ describe('Shared', () => {
 
       it('should call create client with config', () => {
         // Given
-        removeFileStub.callsArgWith(2, null, {})
+        createClientStub.removeFile.callsArgWith(2, null, {})
 
         // When
         let promise = containers.deleteFile()
 
         // Then
         return promise.then(() => {
-          createClientStub.should.have.been.calledWith(storageConfig)
+          pkgcloud.storage.createClient.should.have.been.calledWith(storageConfig)
         })
       })
 
       it('should return a rejected promise when something turns sour', () => {
         // Given
-        removeFileStub.callsArgWith(2, new Error('Unable to remove that document'), null)
+        createClientStub.removeFile.callsArgWith(2, new Error('Unable to remove that document'), null)
 
         // When
         let promise = containers.deleteFile()
@@ -317,7 +310,7 @@ describe('Shared', () => {
 
       it('should call removeFile with arguments', () => {
         // Given
-        removeFileStub.callsArgWith(2, null, {})
+        createClientStub.removeFile.callsArgWith(2, null, {})
         let tripId = 'TRIP_ID'
         let imageId = 'IMAGE_ID'
 
@@ -326,7 +319,7 @@ describe('Shared', () => {
 
         // Then
         return promise.then(() => {
-          removeFileStub.should.have.been.calledWith(tripId, imageId)
+          createClientStub.removeFile.should.have.been.calledWith(tripId, imageId)
         })
       })
     })
@@ -341,7 +334,7 @@ describe('Shared', () => {
         containers.destroy()
 
         // Then
-        createClientStub.should.have.been.calledWith(storageConfig)
+        pkgcloud.storage.createClient.should.have.been.calledWith(storageConfig)
       })
 
       it('should call destroyContainer', () => {
@@ -352,13 +345,13 @@ describe('Shared', () => {
         containers.destroy(tripId)
 
         // Then
-        destroyContainerStub.should.have.been.calledWith(tripId)
+        createClientStub.destroyContainer.should.have.been.calledWith(tripId)
       })
 
       it('should return a rejected promise when unable to destroy the container', () => {
         // Given
         let tripId = '873'
-        destroyContainerStub.callsArgWith(1, new Error('Unable to destroy container'))
+        createClientStub.destroyContainer.callsArgWith(1, new Error('Unable to destroy container'))
 
         // When
         let promise = containers.destroy(tripId)
@@ -375,7 +368,7 @@ describe('Shared', () => {
       it('should return a resolved promise when deletion worked', () => {
         // Given
         let tripId = '873'
-        destroyContainerStub.callsArgWith(1, null, {})
+        createClientStub.destroyContainer.callsArgWith(1, null, {})
 
         // When
         let promise = containers.destroy(tripId)

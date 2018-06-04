@@ -1,7 +1,7 @@
 /* global describe, it */
-var index = require(require('config').get('app-folder') + '/index')
-var request = require('supertest')
-var expect = require('chai').expect
+const index = require('../../app/index')
+const request = require('supertest')
+const expect = require('chai').expect
 
 describe('API', function () {
   it('should have api informations on root', function (done) {
