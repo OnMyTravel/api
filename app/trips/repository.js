@@ -4,16 +4,16 @@ function findById (id) {
   return Trip.findById(id).exec()
 }
 
-function findByOwnerId (owner_id) {
-  return Trip.find({ owner_id })
+function findByOwnerId (ownerId) {
+  return Trip.find({ owner_id: ownerId })
 }
 
 function create (model) {
   return new Trip(model).save()
 }
 
-function updateByIdAndOwnerId (_id, owner_id, model) {
-  return Trip.update({ _id, owner_id }, { $set: model }, {runValidators: true})
+function updateByIdAndOwnerId (_id, ownerId, model) {
+  return Trip.update({ _id, owner_id: ownerId }, { $set: model }, {runValidators: true})
 }
 
 function deleteById (_id) {

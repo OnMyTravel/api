@@ -1,20 +1,19 @@
 /* global describe, it, before */
-const app = require('../../app/index');
-const db = require('../../database');
-const Faker = require('faker');
-const Trip = require('../../app/trips/model');
-const shared = require('../../app/shared');
+const app = require('../../app/index')
+const db = require('../../database')
+const Faker = require('faker')
+const Trip = require('../../app/trips/model')
+const shared = require('../../app/shared')
 
-const chai = require('chai');
-const chaiHttp = require('chai-http');
-const mongoose = require('mongoose');
+const chai = require('chai')
+const chaiHttp = require('chai-http')
+const mongoose = require('mongoose')
 
-chai.should();
-chai.use(chaiHttp);
+chai.should()
+chai.use(chaiHttp)
 
 describe('Functional | Trips', function () {
-
-  let dbConnexion;
+  let dbConnexion
   before(() => {
     dbConnexion = db.openDatabaseConnexion()
   })
@@ -46,7 +45,7 @@ describe('Functional | Trips', function () {
             owner_id: userId.toString()
           }
 
-          return Trip.create(expectedTrip);
+          return Trip.create(expectedTrip)
         })
 
         describe('when the database access is on error', () => {
@@ -126,10 +125,10 @@ describe('Functional | Trips', function () {
             .set('Authorization', 'Bearer ' + token)
             .send({})
             .end((e, res) => {
-              res.should.have.status(400);
-              done();
-            });
-        });
+              res.should.have.status(400)
+              done()
+            })
+        })
 
         it('should have a payload', (done) => {
           chai.request(app)
@@ -137,7 +136,7 @@ describe('Functional | Trips', function () {
             .set('Authorization', 'Bearer ' + token)
             .send({})
             .end((e, res) => {
-              res.should.have.status(400);
+              res.should.have.status(400)
               res.body.should.be.deep.equal({
                 message: 'Trip validation failed: name: Path `name` is required.',
                 name: 'ValidationError',
@@ -147,15 +146,14 @@ describe('Functional | Trips', function () {
                     kind: 'required'
                   }
                 }
-              });
-              done();
-            });
-        });
-      });
-    });
+              })
+              done()
+            })
+        })
+      })
+    })
 
     describe(':getOne', () => {
-
       let trip, userId
       beforeEach(() => {
         userId = mongoose.Types.ObjectId()
@@ -187,7 +185,6 @@ describe('Functional | Trips', function () {
     })
 
     describe(':updateOne', () => {
-
       let trip, userId
       beforeEach(() => {
         userId = mongoose.Types.ObjectId()
@@ -280,7 +277,6 @@ describe('Functional | Trips', function () {
     })
 
     describe(':deleteOne', () => {
-
       let userId, trip, token
       beforeEach(() => {
         userId = mongoose.Types.ObjectId().toString()

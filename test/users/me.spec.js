@@ -12,11 +12,10 @@ const jsonwebtoken = require('jsonwebtoken')
 chai.should()
 chai.use(chaiHttp)
 
-describe('Users', () => {
-
+describe('Functional | Users', () => {
   let connexion
   beforeEach(() => {
-    connexion = db.openDatabaseConnexion();
+    connexion = db.openDatabaseConnexion()
   })
 
   afterEach(() => {
@@ -38,20 +37,20 @@ describe('Users', () => {
     describe('when a token is provided and valid', () => {
       let user
       let token
-      beforeEach((done) => {
+      beforeEach(() => {
         let userData = {
           name: faker.name.findName(),
           email: faker.internet.email(),
           id_facebook: '123456'
         }
 
-        new User(userData).save().then((createdUser) => {
-          user = createdUser.toJSON()
-          token = jsonwebtoken.sign({
-            id: createdUser._id
-          }, config.get('app-secret'))
-          done()
-        })
+        return User.create(userData)
+          .then((createdUser) => {
+            user = createdUser.toJSON()
+            token = jsonwebtoken.sign({
+              id: createdUser._id
+            }, config.get('app-secret'))
+          })
       })
 
       it('should return user informations', (done) => {

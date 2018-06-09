@@ -18,8 +18,7 @@ const ALLOWEDTOKEN = 'EAACEdEose0cBAKLLwLKSXjs2Xrgd4LdSermEQMhbhUo3qAl8hmj98hB0'
 const UNAUTHORIZEDTOKEN = 'EAACEdEose0cBAM8BlABqcgQlCIZCZAZAJgW60opqGtC3iIfg2gZBp6oC'
 
 describe('Functionnal | Users', () => {
-
-  let connexion;
+  let connexion
   before(() => {
     connexion = db.openDatabaseConnexion()
   })
@@ -72,7 +71,6 @@ describe('Functionnal | Users', () => {
       let user, userData
 
       beforeEach(() => {
-
         userData = {
           name: faker.name.findName(),
           email: faker.internet.email(),
@@ -80,13 +78,13 @@ describe('Functionnal | Users', () => {
         }
         return User.create(userData)
           .then(createdUser => {
-            user = createdUser;
+            user = createdUser
             mockHttpAnswser(facebookResponses.OK, ALLOWEDTOKEN)
           })
       })
 
       afterEach(() => {
-        User.remove({}).exec();
+        return User.remove({})
       })
 
       it('should return an encrypted token', (done) => {
@@ -139,7 +137,7 @@ describe('Functionnal | Users', () => {
   })
 })
 
-function mockHttpAnswser(answer, token) {
+function mockHttpAnswser (answer, token) {
   nock('https://graph.facebook.com', { reqheaders: { 'authorization': 'Bearer ' + token } })
     .get('/v2.8/me?fields=id%2Cname%2Cemail')
     .reply(answer.status, answer.body)

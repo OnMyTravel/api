@@ -1,8 +1,8 @@
-const chai = require("chai");
-const sinon = require("sinon");
-const sinonChai = require("sinon-chai");
-chai.should();
-chai.use(sinonChai);
+const chai = require('chai')
+const sinon = require('sinon')
+const sinonChai = require('sinon-chai')
+chai.should()
+chai.use(sinonChai)
 
 const Faker = require('faker')
 const mongoose = require('mongoose')
@@ -15,12 +15,11 @@ const stepMiddleware = require('../../app/steps/middleware')
 const repository = require('../../app/steps/repository')
 
 describe('Unit | Step | Middleware', () => {
-
-  let sandbox;
-  let connexion;
+  let sandbox
+  let connexion
 
   before(() => {
-    connexion = db.openDatabaseConnexion();
+    connexion = db.openDatabaseConnexion()
   })
 
   after(() => {
@@ -28,9 +27,9 @@ describe('Unit | Step | Middleware', () => {
   })
 
   beforeEach(() => {
-    sandbox = sinon.createSandbox();
+    sandbox = sinon.createSandbox()
     sandbox.stub(repository, 'findByTripIdAndStepId').resolves()
-    sandbox.stub(repository, 'findByTripIdStepIdAndImageId').resolves();
+    sandbox.stub(repository, 'findByTripIdStepIdAndImageId').resolves()
   })
 
   afterEach(() => {
@@ -38,7 +37,6 @@ describe('Unit | Step | Middleware', () => {
   })
 
   describe(':exists', () => {
-
     describe('when the steps does not exist', () => {
       it('should return NOT_FOUND', () => {
         // Given
@@ -64,12 +62,11 @@ describe('Unit | Step | Middleware', () => {
     })
 
     describe('when the steps exists', () => {
-
-      let step, trip_id
+      let step, tripId
       beforeEach(() => {
-        trip_id = mongoose.Types.ObjectId()
+        tripId = mongoose.Types.ObjectId()
         return Step
-          .create({ trip_id, message: Faker.lorem.sentence() })
+          .create({ trip_id: tripId, message: Faker.lorem.sentence() })
           .then((createdStep) => {
             step = createdStep
           })
@@ -86,7 +83,7 @@ describe('Unit | Step | Middleware', () => {
         let request = httpMocks.createRequest({
           url: '',
           params: {
-            tripid: trip_id.toString(),
+            tripid: tripId.toString(),
             stepid: step._id.toString()
           }
         })

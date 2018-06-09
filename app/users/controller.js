@@ -27,10 +27,10 @@ function registerFromFacebook (req, res) {
               email: data.email,
               id_facebook: data.id
             }).save()
-            .then((created) => {
-              let token = shared.tokens.create(created._id, req.body.access_token)
-              res.status(httpStatus.CREATED).json({ token })
-            })
+              .then((created) => {
+                let token = shared.tokens.create(created._id, req.body.access_token)
+                res.status(httpStatus.CREATED).json({ token })
+              })
           }
         })
     }, (error) => {

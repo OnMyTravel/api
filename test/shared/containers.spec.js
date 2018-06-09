@@ -3,11 +3,11 @@ const httpMocks = require('node-mocks-http')
 
 const StreamTest = require('streamtest')['v2']
 const faker = require('faker')
-const chai = require("chai");
-const sinon = require("sinon");
-const sinonChai = require("sinon-chai");
-chai.should();
-chai.use(sinonChai);
+const chai = require('chai')
+const sinon = require('sinon')
+const sinonChai = require('sinon-chai')
+chai.should()
+chai.use(sinonChai)
 
 const storageConfig = {
   'provider': 'openstack',
@@ -24,15 +24,13 @@ const FILE_THAT_EXISTS = 'bar/baz.jpg'
 const pkgcloud = require('pkgcloud')
 const config = require('config')
 
-let configGetStub = sinon.stub().withArgs('storage').returns(storageConfig)
 let createReadStreamStub = sinon.stub()
 
-const containers = require('../../app/shared/containers');
+const containers = require('../../app/shared/containers')
 
 describe('Unit | Shared', () => {
   describe('containers', () => {
-
-    const sandbox = sinon.createSandbox();
+    const sandbox = sinon.createSandbox()
     let createClientStub
 
     beforeEach(() => {
@@ -41,14 +39,14 @@ describe('Unit | Shared', () => {
         upload: sinon.stub(),
         download: sinon.stub(),
         removeFile: sinon.stub(),
-        destroyContainer: sinon.stub(),
+        destroyContainer: sinon.stub()
       }
 
       sandbox
         .stub(pkgcloud.storage, 'createClient')
-        .returns(createClientStub);
+        .returns(createClientStub)
 
-        sandbox.stub(config, 'get').withArgs('storage').returns(storageConfig)
+      sandbox.stub(config, 'get').withArgs('storage').returns(storageConfig)
     })
 
     afterEach(() => (
@@ -56,12 +54,12 @@ describe('Unit | Shared', () => {
     ))
 
     it('checks sanity', () => {
-      shared.containers.should.be.defined
+      shared.containers.should.exist
     })
 
     describe(':create', () => {
       it('checks sanity', () => {
-        shared.containers.create.should.be.defined
+        shared.containers.create.should.exist
       })
 
       it('should use configuration', () => {
@@ -96,15 +94,14 @@ describe('Unit | Shared', () => {
         const promise = containers
           .create(tripId)
 
-
         // Then
         return promise.then((container) => {
-            container.should.deep.equal(containerDetails)
-            createClientStub.createContainer.should.have.been.calledWith({ name: tripId })
-          }, () => {
-            throw new Error('Should not be on error')
-          })
-      });
+          container.should.deep.equal(containerDetails)
+          createClientStub.createContainer.should.have.been.calledWith({ name: tripId })
+        }, () => {
+          throw new Error('Should not be on error')
+        })
+      })
 
       it('should return a rejected promise with the error', () => {
         // Given
@@ -140,7 +137,7 @@ describe('Unit | Shared', () => {
 
       let erroredReadableStream, readableStream, writableStream
       beforeEach(() => {
-        writableStream = StreamTest.toChunks(() => {})
+        writableStream = StreamTest.toChunks(() => { })
         readableStream = StreamTest.fromChunks([Buffer.from('file')])
         erroredReadableStream = StreamTest.fromErroredChunks(
           new Error('ENOENT: no such file or directory, open \'foo.jpg\''),
@@ -159,7 +156,7 @@ describe('Unit | Shared', () => {
       })
 
       it('checks sanity', () => {
-        shared.containers.uploadToStorage.should.be.defined
+        shared.containers.uploadToStorage.should.exist
       })
 
       it('should return a resolved promise if the file does not exist', () => {
@@ -168,12 +165,12 @@ describe('Unit | Shared', () => {
 
         // Then
         return promise.then(
-            (file) => { file.should.be.undefined() },
-            (err) => {
-              err.should.be.an.instanceof(shared.errors.classes.ContainerError)
-              err.message.should.be.equal("ENOENT: no such file or directory, open 'foo.jpg'")
-            }
-          )
+          (file) => { file.should.be.undefined() },
+          (err) => {
+            err.should.be.an.instanceof(shared.errors.classes.ContainerError)
+            err.message.should.be.equal("ENOENT: no such file or directory, open 'foo.jpg'")
+          }
+        )
       })
 
       it('should create a storage client', () => {
@@ -245,7 +242,7 @@ describe('Unit | Shared', () => {
 
     describe(':download', () => {
       it('checks sanity', () => {
-        shared.containers.download.should.be.defined
+        shared.containers.download.should.exist
       })
 
       it('should create a storageClient', () => {
@@ -276,7 +273,7 @@ describe('Unit | Shared', () => {
 
     describe(':deleteFile', () => {
       it('checks sanity', () => {
-        containers.deleteFile.should.be.defined
+        containers.deleteFile.should.exist
       })
 
       it('should call create client with config', () => {
@@ -326,7 +323,7 @@ describe('Unit | Shared', () => {
 
     describe(':destroy', () => {
       it('checks sanity', () => {
-        containers.destroy.should.be.defined
+        containers.destroy.should.exist
       })
 
       it('should create a storageClient', () => {
@@ -374,10 +371,7 @@ describe('Unit | Shared', () => {
         let promise = containers.destroy(tripId)
 
         // Then
-        return promise.then(() => {
-
-        }, (error) => {
-          throw new Error('Should not be on error')
+        return promise.catch((error) => {
           error.should.be.an.instanceof(shared.errors.classes.ContainerError)
           error.message.should.equal('Unable to destroy container')
         })

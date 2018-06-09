@@ -1,10 +1,10 @@
 const config = require('config')
 const jsonwebtoken = require('jsonwebtoken')
 
-function create (user_id, facebook_token) {
+function create (userId, facebookToken) {
   return jsonwebtoken.sign({
-    id: user_id,
-    facebook_access_token: facebook_token
+    id: userId,
+    facebook_access_token: facebookToken
   }, config.get('app-secret'), { expiresIn: '1h' })
 }
 

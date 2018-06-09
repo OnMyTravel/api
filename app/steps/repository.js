@@ -28,9 +28,9 @@ function deleteByTripId (tripId) {
   return Step.remove({ trip_id: tripId })
 }
 
-function addImageToGallery (step_id, imageModel) {
+function addImageToGallery (stepId, imageModel) {
   return Step
-    .findOne({ _id: step_id })
+    .findOne({ _id: stepId })
     .then((step) => {
       step.gallery.push(imageModel)
       return step.save()

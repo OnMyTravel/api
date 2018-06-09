@@ -1,8 +1,8 @@
-const chai = require("chai");
-const sinon = require("sinon");
-const sinonChai = require("sinon-chai");
-chai.should();
-chai.use(sinonChai);
+const chai = require('chai')
+const sinon = require('sinon')
+const sinonChai = require('sinon-chai')
+chai.should()
+chai.use(sinonChai)
 
 const faker = require('faker')
 const config = require('config')
@@ -12,10 +12,9 @@ const httpMocks = require('node-mocks-http')
 const tokens = require('../../app/shared/tokens')
 
 describe('Unit | Shared | tokens', () => {
-
   let tokenPayload
   let token
-  
+
   before(() => {
     tokenPayload = {
       name: faker.name.findName(),
@@ -31,7 +30,7 @@ describe('Unit | Shared | tokens', () => {
     })
 
     afterEach(() => {
-      jsonwebtoken.sign.restore();
+      jsonwebtoken.sign.restore()
     })
 
     it('should create a token that expires in 1h', () => {
@@ -46,7 +45,7 @@ describe('Unit | Shared | tokens', () => {
 
   describe(':getToken', () => {
     it('checks sanity', () => {
-      tokens.getToken.should.be.defined
+      tokens.getToken.should.exist
     })
 
     it('should return the token', () => {
@@ -68,7 +67,7 @@ describe('Unit | Shared | tokens', () => {
 
   describe(':decode', () => {
     it('checks sanity', () => {
-      tokens.decode.should.be.defined
+      tokens.decode.should.exist
     })
 
     it('should return decoded payload', () => {

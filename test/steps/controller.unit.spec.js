@@ -1,8 +1,8 @@
-const chai = require("chai");
-const sinon = require("sinon");
-const sinonChai = require("sinon-chai");
-chai.should();
-chai.use(sinonChai);
+const chai = require('chai')
+const sinon = require('sinon')
+const sinonChai = require('sinon-chai')
+chai.should()
+chai.use(sinonChai)
 
 const httpMocks = require('node-mocks-http')
 const fs = require('fs')
@@ -32,8 +32,7 @@ const StepController = require('../../app/steps/controller')
 
 describe('Unit | Steps | Controller', () => {
   describe(':attach', () => {
-
-    const sandbox = sinon.createSandbox();
+    const sandbox = sinon.createSandbox()
 
     beforeEach(() => {
       sandbox.stub(shared.images, 'getCoordinates')
@@ -42,7 +41,7 @@ describe('Unit | Steps | Controller', () => {
 
       sandbox.stub(shared.containers, 'uploadToStorage').resolves()
       sandbox.stub(fs, 'unlinkSync')
-      sandbox.stub(repository, 'addImageToGallery').resolves(STEP_SAVED_IN_DB)      
+      sandbox.stub(repository, 'addImageToGallery').resolves(STEP_SAVED_IN_DB)
     })
 
     afterEach(() => {
@@ -111,7 +110,7 @@ describe('Unit | Steps | Controller', () => {
           let t = StepController.attach(request, response)
 
           // Then
-          return t.then((e) => {
+          return t.then(() => {
             response.statusCode.should.equal(422)
             shared.images.getCoordinates.should.have.been.calledWith('path/to/errored/file.jpg')
           })
@@ -131,10 +130,10 @@ describe('Unit | Steps | Controller', () => {
 
       it('should upload the image', () => {
         // When
-        let t = StepController.attach(request, response)
+        let promise = StepController.attach(request, response)
 
         // Then
-        return t.then((e) => {
+        return promise.then(() => {
           response.statusCode.should.equal(201)
           shared.containers.uploadToStorage.should.have.been.calledWith({
             path: 'path/to/myfile.jpg',
@@ -146,10 +145,10 @@ describe('Unit | Steps | Controller', () => {
 
       it('should save the image in database', () => {
         // When
-        let t = StepController.attach(request, response)
+        let promise = StepController.attach(request, response)
 
         // Then
-        return t.then((e) => {
+        return promise.then(() => {
           repository.addImageToGallery.should.have.been.calledWith('GOOD_STEP_ID', {
             caption: 'My caption',
             source: 'myfile.jpg',
@@ -173,17 +172,16 @@ describe('Unit | Steps | Controller', () => {
       })
 
       describe('when the upload fails', () => {
-        
         it('should return INTERNAL ERROR', () => {
           // Given
-          shared.containers.uploadToStorage.rejects(new ContainerError('Unable to upload the file'))          
+          shared.containers.uploadToStorage.rejects(new ContainerError('Unable to upload the file'))
           request.params.tripid = 'ERRORED_ID'
 
           // When
-          let t = StepController.attach(request, response)
+          let promise = StepController.attach(request, response)
 
           // Then
-          return t.then((e) => {
+          return promise.then(() => {
             response.statusCode.should.equal(500)
           })
         })
@@ -192,7 +190,6 @@ describe('Unit | Steps | Controller', () => {
   })
 
   describe(':getImage', () => {
-
     beforeEach(() => {
       sinon.stub(shared.containers, 'download')
     })
@@ -232,7 +229,7 @@ describe('Unit | Steps | Controller', () => {
   describe(':deleteOne', () => {
     let response, request
 
-    const sandbox = sinon.createSandbox();
+    const sandbox = sinon.createSandbox()
 
     beforeEach(() => {
       response = httpMocks.createResponse()
@@ -265,11 +262,6 @@ describe('Unit | Steps | Controller', () => {
 
     afterEach(() => {
       sandbox.restore()
-    })
-
-
-    it('checks sanity', () => {
-      StepController.deleteOne.should.be.defined
     })
 
     it('should remove file from container', () => {

@@ -4,7 +4,6 @@ chai.should()
 
 describe('Shared', () => {
   describe('errors', () => {
-
     it('checks sanity', () => {
       shared.should.have.property('errors')
     })
@@ -13,17 +12,17 @@ describe('Shared', () => {
       let errorMessage, expectedMessage
       before(() => {
         errorMessage = {
-            message: 'Trip validation failed',
-            name: 'ValidationError',
-            errors: {
-                name: {
-                    message: 'Path `name` is required.',
-                    name: 'ValidatorError',
-                    properties: [Object],
-                    kind: 'required',
-                    path: 'name'
-                }
+          message: 'Trip validation failed',
+          name: 'ValidationError',
+          errors: {
+            name: {
+              message: 'Path `name` is required.',
+              name: 'ValidatorError',
+              properties: [Object],
+              kind: 'required',
+              path: 'name'
             }
+          }
         }
 
         expectedMessage = {

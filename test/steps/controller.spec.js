@@ -1,5 +1,4 @@
 /* global describe it */
-const config = require('config')
 const app = require('../../app/index')
 const db = require('../../database')
 const Trip = require('../../app/trips/model')
@@ -7,7 +6,6 @@ const Step = require('../../app/steps/models/step')
 const Faker = require('faker')
 const mongoose = require('mongoose')
 const shared = require('../../app/shared')
-const fs = require('fs')
 
 const chai = require('chai')
 const chaiHttp = require('chai-http')
@@ -15,8 +13,7 @@ chai.should()
 chai.use(chaiHttp)
 
 describe('Functional | Steps', () => {
-
-  let dbConnexion;
+  let dbConnexion
   beforeEach(() => {
     dbConnexion = db.openDatabaseConnexion()
   })
@@ -27,7 +24,6 @@ describe('Functional | Steps', () => {
 
   describe('controller', () => {
     describe(':deleteOne', () => {
-
       describe('when the user is not authenticated', () => {
         it('should return UNAUTHORIZED', (done) => {
           chai.request(app)
@@ -58,10 +54,10 @@ describe('Functional | Steps', () => {
 
         beforeEach(() => {
           let name = Faker.lorem.sentence()
-          let owner_id = mongoose.Types.ObjectId()
-          token = shared.tokens.create(owner_id, '')
+          let ownerId = mongoose.Types.ObjectId()
+          token = shared.tokens.create(ownerId, '')
 
-          return Trip.create({ name, owner_id })
+          return Trip.create({ name, owner_id: ownerId })
             .then((createdTrip) => {
               trip = createdTrip
             })
@@ -93,7 +89,6 @@ describe('Functional | Steps', () => {
         })
 
         describe('and the step exists', () => {
-
           let step
           beforeEach(() => {
             return Step
@@ -144,9 +139,9 @@ describe('Functional | Steps', () => {
 
         beforeEach(() => {
           let name = Faker.lorem.sentence()
-          let owner_id = mongoose.Types.ObjectId()
+          let ownerId = mongoose.Types.ObjectId()
 
-          return Trip.create({ name, owner_id })
+          return Trip.create({ name, owner_id: ownerId })
             .then((createdTrip) => {
               trip = createdTrip
 
@@ -164,7 +159,7 @@ describe('Functional | Steps', () => {
               }
 
               return Step
-                .create([firstTripStep, secondTripStep, otherTripStep]);
+                .create([firstTripStep, secondTripStep, otherTripStep])
             })
         })
 
@@ -321,7 +316,6 @@ describe('Functional | Steps', () => {
       })
 
       describe('when the trip exists', () => {
-
         let userId, trip
         beforeEach(() => {
           userId = mongoose.Types.ObjectId()
@@ -331,7 +325,7 @@ describe('Functional | Steps', () => {
             owner_id: userId.toString()
           }).then((createdTrip) => {
             trip = createdTrip
-          });
+          })
         })
 
         describe('but is not editable', () => {
@@ -367,7 +361,6 @@ describe('Functional | Steps', () => {
           })
 
           describe('and the step exists', () => {
-
             let step
             beforeEach(() => {
               return Step
@@ -469,7 +462,6 @@ describe('Functional | Steps', () => {
 
           describe('and the step exists', () => {
             describe('but it is related to another trip', () => {
-
               let step
               beforeEach(() => {
                 return Step

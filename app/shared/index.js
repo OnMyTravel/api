@@ -30,16 +30,16 @@ function isAuthenticated (request, response, next) {
 }
 
 function format (mongooseError) {
-  delete mongooseError._message;
+  delete mongooseError._message
 
   for (let property in mongooseError.errors) {
-    let propertyField = mongooseError.errors[property];
+    let propertyField = mongooseError.errors[property]
 
-    delete propertyField.name;
-    delete propertyField.$isValidatorError;
-    delete propertyField.path;
-    delete propertyField.properties;
-    delete propertyField._message;
+    delete propertyField.name
+    delete propertyField.$isValidatorError
+    delete propertyField.path
+    delete propertyField.properties
+    delete propertyField._message
   }
 
   return mongooseError

@@ -1,5 +1,4 @@
-const config = require('config')
-const shared = require(config.get('app-folder') + '/shared')
+const shared = require('../../app/shared')
 const chai = require('chai')
 const expect = require('chai').expect
 chai.should()

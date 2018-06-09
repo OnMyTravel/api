@@ -6,7 +6,7 @@ const mongoose = require('mongoose')
 const httpMocks = require('node-mocks-http')
 const shared = require(config.get('app-folder') + '/shared')
 
-const db = require('../../database');
+const db = require('../../database')
 
 const chai = require('chai')
 const sinonChai = require('sinon-chai')
@@ -14,15 +14,14 @@ chai.should()
 chai.use(sinonChai)
 
 describe('Integration | Trip | Middleware', () => {
-
-  let owner_id, trip, token, connexion
+  let ownerId, trip, token, connexion
 
   beforeEach(() => {
     connexion = db.openDatabaseConnexion()
 
-    owner_id = mongoose.Types.ObjectId()
-    token = shared.tokens.create(owner_id, '')
-    return Trip.create({ name: 'My already created trip', owner_id })
+    ownerId = mongoose.Types.ObjectId()
+    token = shared.tokens.create(ownerId, '')
+    return Trip.create({ name: 'My already created trip', owner_id: ownerId })
       .then((createdTrip) => {
         trip = createdTrip
       })
@@ -30,13 +29,13 @@ describe('Integration | Trip | Middleware', () => {
 
   afterEach(() => {
     return Trip.remove({}).then(() => {
-      connexion.close();
+      connexion.close()
     })
   })
 
   describe(':exists', () => {
     describe('when the trip exists', () => {
-      it('should call the next() if the trip exists', (done) => {
+      it('should call the next() if the trip exists', () => {
         // Given
         var next = sinon.spy()
         let response = httpMocks.createResponse()
@@ -51,15 +50,14 @@ describe('Integration | Trip | Middleware', () => {
         let middlewarePromise = tripMiddleware.exists(request, response, next)
 
         // Then
-        middlewarePromise.finally(() => {
+        return middlewarePromise.then(() => {
           next.should.have.been.called
-          done()
         })
       })
     })
 
     describe('when the trip does not exist', () => {
-      it('should return NOT_FOUND', (done) => {
+      it('should return NOT_FOUND', () => {
         // Given
         var next = sinon.spy()
         let response = httpMocks.createResponse()
@@ -74,10 +72,9 @@ describe('Integration | Trip | Middleware', () => {
         let middlewarePromise = tripMiddleware.exists(request, response, next)
 
         // Then
-        middlewarePromise.finally(() => {
+        return middlewarePromise.then(() => {
           next.should.not.have.been.called
           response.statusCode.should.be.equal(404)
-          done()
         })
       })
     })
@@ -86,7 +83,7 @@ describe('Integration | Trip | Middleware', () => {
   describe(':existsAndIsEditable', () => {
     describe('when the trip exists', () => {
       describe('and owned by the current user', () => {
-        it('should call the next()', (done) => {
+        it('should call the next()', () => {
           // Given
           var next = sinon.spy()
           let response = httpMocks.createResponse()
@@ -104,15 +101,14 @@ describe('Integration | Trip | Middleware', () => {
           let middlewarePromise = tripMiddleware.existsAndIsEditable(request, response, next)
 
           // Then
-          middlewarePromise.finally(() => {
+          return middlewarePromise.then(() => {
             next.should.have.been.called
-            done()
           })
         })
       })
 
       describe('and cant be edited by the current user', () => {
-        it('should return FORBIDDEN', (done) => {
+        it('should return FORBIDDEN', () => {
           // Given
           let anotherUserToken = shared.tokens.create(mongoose.Types.ObjectId(), '')
           var next = sinon.spy()
@@ -131,17 +127,16 @@ describe('Integration | Trip | Middleware', () => {
           let middlewarePromise = tripMiddleware.existsAndIsEditable(request, response, next)
 
           // Then
-          middlewarePromise.finally(() => {
+          return middlewarePromise.then(() => {
             response.statusCode.should.be.equal(403)
             next.should.not.have.been.called
-            done()
           })
         })
       })
     })
 
     describe('when the trip does not exist', () => {
-      it('should return NOT_FOUND', (done) => {
+      it('should return NOT_FOUND', () => {
         // Given
         var next = sinon.spy()
         let response = httpMocks.createResponse()
@@ -159,10 +154,9 @@ describe('Integration | Trip | Middleware', () => {
         let middlewarePromise = tripMiddleware.existsAndIsEditable(request, response, next)
 
         // Then
-        middlewarePromise.finally(() => {
+        return middlewarePromise.then(() => {
           next.should.not.have.been.called
           response.statusCode.should.be.equal(404)
-          done()
         })
       })
     })

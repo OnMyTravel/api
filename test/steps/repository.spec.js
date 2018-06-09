@@ -1,6 +1,6 @@
 const chai = require('chai')
-const chaiAsPromised = require("chai-as-promised");
-chai.use(chaiAsPromised);
+const chaiAsPromised = require('chai-as-promised')
+chai.use(chaiAsPromised)
 chai.use(require('sinon-chai'))
 chai.should()
 const expect = chai.expect
@@ -8,14 +8,13 @@ const expect = chai.expect
 const Mongoose = require('mongoose')
 const Faker = require('faker')
 
-const db = require('../../database');
+const db = require('../../database')
 
 const Step = require('../../app/steps/models/step')
 const repository = require('../../app/steps/repository')
 
 describe('Integration | Step | Repository', () => {
-
-  let connexion;
+  let connexion
   beforeEach(() => {
     connexion = db.openDatabaseConnexion()
   })
@@ -34,7 +33,7 @@ describe('Integration | Step | Repository', () => {
 
     it('should return the created trip', () => {
       let message = Faker.lorem.sentence()
-      let trip_id = Mongoose.Types.ObjectId()
+      let tripId = Mongoose.Types.ObjectId()
       let location = {
         label: Faker.lorem.sentence(),
         coordinates: {
@@ -43,40 +42,39 @@ describe('Integration | Step | Repository', () => {
         }
       }
 
-      const promise = repository.create({ message, trip_id, location });
+      const promise = repository.create({ message, trip_id: tripId, location })
 
       return promise
         .then((createdTrip) => {
           createdTrip.message.should.be.equal(message)
-          createdTrip.trip_id.should.be.equal(trip_id)
+          createdTrip.trip_id.should.be.equal(tripId)
           createdTrip.location.label.should.be.equal(location.label)
           createdTrip.location.coordinates.latitude.should.be.equal(location.coordinates.latitude)
           createdTrip.location.coordinates.longitude.should.be.equal(location.coordinates.longitude)
-          createdTrip.creation_date.should.not.be.null
+          expect(createdTrip.creation_date).not.be.null
         })
     })
 
     it('should failed when the model does not respect the validation rules', () => {
       // when
-      const promise = repository.create({});
+      const promise = repository.create({})
 
       // then
-      return promise.should.be.rejectedWith(Mongoose.Error.ValidationError);
+      return promise.should.be.rejectedWith(Mongoose.Error.ValidationError)
     })
   })
 
   describe(':findByTripId', () => {
-
-    let firstMessage, thirdMessage, trip_id
+    let firstMessage, thirdMessage, tripId
 
     beforeEach(() => {
       firstMessage = Faker.lorem.sentence()
       let messageTwo = Faker.lorem.sentence()
       thirdMessage = Faker.lorem.sentence()
-      trip_id = Mongoose.Types.ObjectId()
+      tripId = Mongoose.Types.ObjectId()
 
       return Step
-        .create([{ trip_id, message: firstMessage }, { trip_id: Mongoose.Types.ObjectId(), message: messageTwo }, { trip_id, message: thirdMessage }])
+        .create([{ trip_id: tripId, message: firstMessage }, { trip_id: Mongoose.Types.ObjectId(), message: messageTwo }, { trip_id: tripId, message: thirdMessage }])
     })
 
     afterEach(() => {
@@ -90,25 +88,24 @@ describe('Integration | Step | Repository', () => {
 
     it('should return trip\'s steps', () => {
       return repository
-        .findByTripId(trip_id)
+        .findByTripId(tripId)
         .then((trips) => {
           trips.should.have.length(2)
-          trips[0].trip_id.toString().should.equal(trip_id.toString())
+          trips[0].trip_id.toString().should.equal(tripId.toString())
           trips[0].message.should.equal(firstMessage)
-          trips[1].trip_id.toString().should.equal(trip_id.toString())
+          trips[1].trip_id.toString().should.equal(tripId.toString())
           trips[1].message.should.equal(thirdMessage)
         })
     })
   })
 
   describe(':findByTripIdAndStepId', () => {
-
-    let trip_id, step, message
+    let tripId, step, message
     beforeEach(() => {
-      trip_id = Mongoose.Types.ObjectId()
+      tripId = Mongoose.Types.ObjectId()
       message = Faker.lorem.sentence()
       return Step
-        .create([{ message, trip_id }, { message: Faker.lorem.sentence(), trip_id: Mongoose.Types.ObjectId() }])
+        .create([{ message, trip_id: tripId }, { message: Faker.lorem.sentence(), trip_id: Mongoose.Types.ObjectId() }])
         .then((createdSteps) => {
           step = createdSteps[0]
         })
@@ -125,7 +122,7 @@ describe('Integration | Step | Repository', () => {
 
     it('should return steps', (done) => {
       repository
-        .findByTripIdAndStepId(trip_id, step._id)
+        .findByTripIdAndStepId(tripId, step._id)
         .then((step) => {
           step.message.should.equal(message)
           done()
@@ -151,25 +148,20 @@ describe('Integration | Step | Repository', () => {
       repository.deleteById.should.be.a('function')
     })
 
-    it('should remove the selected step', (done) => {
-      repository
+    it('should remove the selected step', () => {
+      const promise = repository
         .deleteById(step._id)
         .then(() => {
-          Step
-            .findById(step._id)
-            .then((step) => {
-              if (step) {
-                done(new Error('Step should have been removed'))
-              } else {
-                done()
-              }
-            })
+          return Step.findById(step._id)
         })
+
+      return promise.then((step) => {
+        expect(step).to.equal(null)
+      })
     })
   })
 
   describe(':updateByTripIdAndStepId', () => {
-
     let step, tripId
     beforeEach(() => {
       tripId = Mongoose.Types.ObjectId()
@@ -237,7 +229,7 @@ describe('Integration | Step | Repository', () => {
           { message: 'TRIP TWO', trip_id: otherTrip },
           { message: 'TRIP ONE - THIRD STEP', trip_id: targetedTrip }
         ])
-        .then((createdStep) => {
+        .then(() => {
           done()
         })
     })
@@ -272,7 +264,7 @@ describe('Integration | Step | Repository', () => {
 
     beforeEach(() => {
       tripId = Mongoose.Types.ObjectId()
-      
+
       return Step
         .create({ message: 'My new trip', trip_id: tripId })
         .then((createdStep) => {
@@ -307,7 +299,7 @@ describe('Integration | Step | Repository', () => {
         .then(() => {
           done(new Error('should not be considered as valid'))
         }, (err) => {
-          err.should.be.defined
+          err.should.exist
           done()
         })
     })
@@ -372,7 +364,7 @@ describe('Integration | Step | Repository', () => {
         .findByTripIdStepIdAndImageId(tripId, createdStep._id, 'path/to/file.png')
 
       return prom.then((step) => {
-        step.should.be.defined
+        step.should.exist
         step._id.toString().should.be.equal(createdStep._id.toString())
       })
     })

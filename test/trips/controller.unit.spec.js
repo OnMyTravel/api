@@ -1,12 +1,11 @@
-const chai = require("chai");
-const sinon = require("sinon");
-const sinonChai = require("sinon-chai");
-chai.should();
-chai.use(sinonChai);
+const chai = require('chai')
+const sinon = require('sinon')
+const sinonChai = require('sinon-chai')
+chai.should()
+chai.use(sinonChai)
 
-const TripController = require('../../app/trips/controller');
+const TripController = require('../../app/trips/controller')
 
-const config = require('config')
 const mongoose = require('mongoose')
 const httpMocks = require('node-mocks-http')
 
@@ -17,23 +16,21 @@ const stepRepository = require('../../app/steps/repository')
 const TRIP_ID = 1234567
 const TRIP = { _id: TRIP_ID, name: 'My super trip' }
 
-
 describe('Unit | Trip | Controller', () => {
   describe(':create', () => {
+    const sandbox = sinon.createSandbox()
 
-    const sandbox = sinon.createSandbox();
-    
     beforeEach(() => {
       sandbox.stub(shared.containers, 'create').resolves()
       sandbox.stub(tripRepository, 'create').resolves(TRIP)
-    });
+    })
 
     afterEach(() => {
-      sandbox.restore();
-    });
+      sandbox.restore()
+    })
 
     it('checks sanity', () => {
-      TripController.create.should.be.defined
+      TripController.create.should.exist
     })
 
     describe('when containers creation is OK', () => {
@@ -83,27 +80,27 @@ describe('Unit | Trip | Controller', () => {
 
     describe('when containers creation failed', () => {
       beforeEach(() => {
-        shared.containers.create.withArgs(TRIP_ID).rejects();
-      });
+        shared.containers.create.withArgs(TRIP_ID).rejects()
+      })
 
       it('should return a bad gateway', () => {
         // Given
-        let response = httpMocks.createResponse();
+        let response = httpMocks.createResponse()
         let request = httpMocks.createRequest({
           method: 'POST',
           url: '/trips',
           headers: {
             'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU4NjY5MzdkMzQ3NjYxNzY0MzY0ZmNmOCIsImZhY2Vib29rX2FjY2Vzc190b2tlbiI6IkVBQUNFZEVvc2UwY0JBRTI2VzJmM3M0QVpDUFNpSmNMZkNHTmd1SGVNME9jdUdXU1NWOTBPeE9OdHh5clg0TUZrakVkOVpBbko3NTVXN0NFYUhCYlpCY1lqcllaQkRVUnlwYWtsazJsQWtJR2Q3RlA2QWV2eFF2OWVFU0xveW5xSUtMZkxFbUFWaGRGV2loaGxPOEg5aGtSZEFtYk93M1pDU3Fmc1pBWkFmQnl4d1pEWkQiLCJpYXQiOjE0ODUxNjEzOTUsImV4cCI6MTQ4NTE2NDk5NX0.b4UaaskpGlWxVAcFsFKl3cUhstszER6cxUrCWUaqRik'
           }
-        });
+        })
 
         // When
-        let t = TripController.create(request, response);
+        let t = TripController.create(request, response)
 
         // Then
         return t.then(() => {
-          shared.containers.create.should.have.been.calledWith(TRIP_ID);
-          response.statusCode.should.equal(502);
+          shared.containers.create.should.have.been.calledWith(TRIP_ID)
+          response.statusCode.should.equal(502)
         })
       })
     })
@@ -111,7 +108,7 @@ describe('Unit | Trip | Controller', () => {
 
   describe(':deleteOne', () => {
     let response, request
-    const sandbox = sinon.createSandbox();
+    const sandbox = sinon.createSandbox()
 
     beforeEach(() => {
       response = httpMocks.createResponse()
@@ -130,11 +127,11 @@ describe('Unit | Trip | Controller', () => {
     })
 
     afterEach(() => {
-      sandbox.restore();
-    });
+      sandbox.restore()
+    })
 
     it('checks sanity', () => {
-      TripController.deleteOne.should.be.defined
+      TripController.deleteOne.should.exist
     })
 
     it('should destroy its container', () => {
@@ -143,8 +140,8 @@ describe('Unit | Trip | Controller', () => {
 
       // Then
       return promise.then(() => {
-        shared.containers.destroy.should.have.been.called;
-        shared.containers.destroy.should.to.have.been.calledWith('58bea7087947bd35daea1d93');
+        shared.containers.destroy.should.have.been.called
+        shared.containers.destroy.should.to.have.been.calledWith('58bea7087947bd35daea1d93')
       })
     })
 
@@ -180,7 +177,7 @@ describe('Unit | Trip | Controller', () => {
 
       it('should return INTERNAL_SERVER_ERROR in case of error', () => {
         // Given
-        tripRepository.deleteById.returns(Promise.reject())
+        tripRepository.deleteById.rejects()
 
         // When
         let promise = TripController.deleteOne(request, response)
@@ -208,7 +205,7 @@ describe('Unit | Trip | Controller', () => {
 
         it('should return INTERNAL_SERVER_ERROR in case of error removing a step', () => {
           // Given
-          stepRepository.deleteByTripId.returns(Promise.reject())
+          stepRepository.deleteByTripId.rejects()
 
           // When
           let promise = TripController.deleteOne(request, response)

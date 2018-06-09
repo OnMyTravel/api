@@ -12,7 +12,7 @@ chai.use(sinonChai)
 describe('Shared', () => {
   describe('isAuthenticated', () => {
     it('checks sanity', () => {
-      shared.isAuthenticated.should.be.defined
+      shared.isAuthenticated.should.exist
     })
 
     describe('when no token is given', () => {
