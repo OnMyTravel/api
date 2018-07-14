@@ -7,7 +7,8 @@
     "test": "NODE_ENV=test ./node_modules/mocha/bin/mocha --recursive --reporter dot",
     "test:full": "NODE_ENV=test ./node_modules/mocha/bin/mocha --recursive",
     "test:watch": "NODE_ENV=test ./node_modules/mocha/bin/mocha --recursive --watch",
-    "start": "node index.js"
+    "start": "node index.js",
+    "start:watch": "npx nodemon"
   },
   "standard": {
     "globals": [
@@ -62,6 +63,7 @@
     "mocha": "^5.2.0",
     "nock": "^9.3.2",
     "node-mocks-http": "^1.7.0",
+    "nodemon": "^1.17.5",
     "sinon": "^5.1.1",
     "sinon-chai": "^3.1.0",
     "streamtest": "^1.2.4",
