@@ -19,7 +19,7 @@ describe('Functional | Trips', function () {
   })
 
   after(() => {
-    dbConnexion.close()
+    return dbConnexion.close()
   })
 
   describe('controller', function () {

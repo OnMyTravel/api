@@ -29,7 +29,7 @@ describe('Integration | Trip | Middleware', () => {
 
   afterEach(() => {
     return Trip.remove({}).then(() => {
-      connexion.close()
+      return connexion.close()
     })
   })
 

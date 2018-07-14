@@ -16,7 +16,7 @@ describe('Integation | Trip | Repository', () => {
   })
 
   after(() => {
-    connexion.close()
+    return connexion.close()
   })
 
   afterEach(() => {

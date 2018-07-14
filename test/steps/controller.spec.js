@@ -19,7 +19,7 @@ describe('Functional | Steps', () => {
   })
 
   afterEach(() => {
-    dbConnexion.close()
+    return dbConnexion.close()
   })
 
   describe('controller', () => {

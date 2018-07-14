@@ -23,7 +23,7 @@ describe('Unit | Step | Middleware', () => {
   })
 
   after(() => {
-    connexion.close()
+    return connexion.close()
   })
 
   beforeEach(() => {

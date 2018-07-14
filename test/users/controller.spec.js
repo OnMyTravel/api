@@ -24,7 +24,7 @@ describe('Functionnal | Users', () => {
   })
 
   after(() => {
-    connexion.close()
+    return connexion.close()
   })
 
   afterEach(() => {
