@@ -126,6 +126,7 @@ typings/
 # dotenv environment variables file
 .env
 
-
+# mac cache system
+.DS_Store
 
 # End of https://www.gitignore.io/api/node,intellij

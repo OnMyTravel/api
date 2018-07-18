@@ -1,5 +1,5 @@
 const config = require('config')
-const Trip = require(config.get('app-folder') + '/trips/model')
+const { Trip } = require('../../app/models')
 const tripMiddleware = require(config.get('app-folder') + '/trips/middleware')
 const sinon = require('sinon')
 const mongoose = require('mongoose')

@@ -13,4 +13,4 @@ let TripSchema = new Schema(
   }
 )
 
-module.exports = mongoose.model('Trip', TripSchema)
+module.exports = TripSchema

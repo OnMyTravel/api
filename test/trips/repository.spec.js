@@ -4,9 +4,8 @@ const chai = require('chai')
 chai.should()
 chai.use(require('sinon-chai'))
 
-const config = require('config')
-const Trip = require(config.get('app-folder') + '/trips/model')
-const repository = require(config.get('app-folder') + '/trips/repository')
+const { Trip } = require('../../app/models')
+const repository = require('../../app/trips/repository')
 const db = require('../../database')
 
 describe('Integation | Trip | Repository', () => {
