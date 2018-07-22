@@ -4,9 +4,10 @@
   "description": "On My Travel API",
   "main": "index.js",
   "scripts": {
-    "test": "NODE_ENV=test ./node_modules/mocha/bin/mocha --recursive --reporter dot",
-    "test:full": "NODE_ENV=test ./node_modules/mocha/bin/mocha --recursive",
-    "test:watch": "NODE_ENV=test ./node_modules/mocha/bin/mocha --recursive --watch",
+    "test": "NODE_ENV=test npx mocha --recursive --reporter dot",
+    "test:full": "NODE_ENV=test npx mocha --recursive",
+    "test:watch": "NODE_ENV=test npx mocha --recursive --reporter dot --watch",
+    "test:coverage": "npx nyc --reporter html npm test",
     "start": "node index.js",
     "start:watch": "npx nodemon"
   },
@@ -65,6 +66,7 @@
     "nock": "^9.3.2",
     "node-mocks-http": "^1.7.0",
     "nodemon": "^1.17.5",
+    "nyc": "^12.0.2",
     "sinon": "^5.1.1",
     "sinon-chai": "^3.1.0",
     "streamtest": "^1.2.4",
