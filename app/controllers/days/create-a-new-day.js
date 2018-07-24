@@ -3,20 +3,22 @@ const { Trip } = require('../../models')
 const { TripNotFound } = require('../../shared/errors')
 
 module.exports = (req, res) => {
-  let createdDay
+  let day
 
   return DaySerializer.deserialize(req.body)
-    .then(day => (createdDay = day))
+    .then(deserializedDay => (day = deserializedDay))
     .then(_ => {
-      return Trip.findById(createdDay.trip.id)
+      return Trip.findById(day.trip.id)
     })
     .then((trip) => {
       if (!trip) {
         throw new TripNotFound()
       }
+
+      return day.save()
     })
-    .then(() => {
-      const serializedDay = DaySerializer.serialize(createdDay)
+    .then((savedDay) => {
+      const serializedDay = DaySerializer.serialize(savedDay)
       res.status(201).json(serializedDay)
     })
     .catch((err) => {

@@ -1,7 +1,7 @@
 /* global describe it */
 const app = require('../../app/index')
 const db = require('../../database')
-const { Trip } = require('../../app/models')
+const { Trip, Day } = require('../../app/models')
 const Faker = require('faker')
 const mongoose = require('mongoose')
 
@@ -99,6 +99,32 @@ describe('Functional | Day | create-a-new-day', () => {
             }
           })
         })
+      })
+
+      it('should persist the day', () => {
+        // when
+        const request = chai.request(app).post(`/days`)
+          .send({
+            'data': {
+              'type': 'days',
+              'attributes': {
+                'ignored': 'params'
+              },
+              'relationships': {
+                'trip': {
+                  'data': {
+                    'type': 'trips', 'id': trip._id
+                  }
+                }
+              }
+            }
+          })
+
+        // then
+        return request.then(() => Day.find({ trip: { id: trip._id } }))
+          .then((createdDay) => {
+            createdDay.should.have.a.lengthOf(1)
+          })
       })
     })
   })
