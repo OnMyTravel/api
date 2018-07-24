@@ -53,15 +53,14 @@ describe('Integation | Trip | Repository', () => {
       repository.create.should.be.a('function')
     })
 
-    it('should return the created trip', (done) => {
+    it('should return the created trip', () => {
       let name = Faker.lorem.sentence()
       let ownerId = Mongoose.Types.ObjectId()
 
-      repository.create({ name, owner_id: ownerId })
+      return repository.create({ name, owner_id: ownerId })
         .then((createdTrip) => {
           createdTrip.name.should.be.equal(name)
           createdTrip.owner_id.should.be.equal(ownerId)
-          done()
         })
     })
 
@@ -93,8 +92,8 @@ describe('Integation | Trip | Repository', () => {
       repository.findByOwnerId.should.be.a('function')
     })
 
-    it('should return one trip', (done) => {
-      repository
+    it('should return one trip', () => {
+      return repository
         .findByOwnerId(ownerId)
         .then((foundTrips) => {
           foundTrips.should.have.length(2)
@@ -102,7 +101,6 @@ describe('Integation | Trip | Repository', () => {
           foundTrips[0].owner_id.toString().should.equal(ownerId.toString())
           foundTrips[1].name.should.equal(nameThree)
           foundTrips[1].owner_id.toString().should.equal(ownerId.toString())
-          done()
         })
     })
   })
