@@ -24,7 +24,7 @@ describe('Functionnal | Users', () => {
   })
 
   after(() => {
-    connexion.close()
+    return connexion.close()
   })
 
   afterEach(() => {
@@ -50,20 +50,21 @@ describe('Functionnal | Users', () => {
     })
 
     describe('when no access_token provided', function () {
-      it('should return a 400', (done) => {
-        chai.request(app)
+      it('should return a 400', () => {
+        // when
+        const request = chai.request(app)
           .post('/users/register/facebook')
           .send({})
-          .end((e, res) => {
-            res.body.should.be.deep.equal({
-              'error': {
-                'name': 'MissingParameter',
-                'message': 'access_token must be provided'
-              }
-            })
-            res.statusCode.should.equal(httpStatus.BAD_REQUEST)
-            done()
+
+        return request.then((res) => {
+          res.body.should.be.deep.equal({
+            'error': {
+              'name': 'MissingParameter',
+              'message': 'access_token must be provided'
+            }
           })
+          res.statusCode.should.equal(httpStatus.BAD_REQUEST)
+        })
       })
     })
 
@@ -137,7 +138,7 @@ describe('Functionnal | Users', () => {
   })
 })
 
-function mockHttpAnswser (answer, token) {
+function mockHttpAnswser(answer, token) {
   nock('https://graph.facebook.com', { reqheaders: { 'authorization': 'Bearer ' + token } })
     .get('/v2.8/me?fields=id%2Cname%2Cemail')
     .reply(answer.status, answer.body)

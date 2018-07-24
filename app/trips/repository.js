@@ -1,4 +1,4 @@
-let Trip = require('./model')
+const { Trip } = require('../models')
 
 function findById (id) {
   return Trip.findById(id).exec()

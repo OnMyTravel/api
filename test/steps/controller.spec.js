@@ -1,7 +1,7 @@
 /* global describe it */
 const app = require('../../app/index')
 const db = require('../../database')
-const Trip = require('../../app/trips/model')
+const { Trip } = require('../../app/models')
 const Step = require('../../app/steps/models/step')
 const Faker = require('faker')
 const mongoose = require('mongoose')
@@ -19,7 +19,7 @@ describe('Functional | Steps', () => {
   })
 
   afterEach(() => {
-    dbConnexion.close()
+    return dbConnexion.close()
   })
 
   describe('controller', () => {

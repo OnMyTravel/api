@@ -19,7 +19,7 @@ describe('Functional | Users', () => {
   })
 
   afterEach(() => {
-    connexion.close()
+    return connexion.close()
   })
 
   describe('/me', () => {

@@ -5,6 +5,8 @@ const morgan = require('morgan')
 
 const app = express()
 
+const logError = require('./handlers/logErrors')
+
 app.use(cors())
 app.use(bodyParser.json())
 
@@ -17,9 +19,12 @@ const pjson = require('../package.json')
 app.use('/trips', require('./trips/routes'))
 app.use('/trips/:tripid/steps', require('./steps/routes'))
 app.use('/users', require('./users/routes'))
+app.use('/', require('./controllers/routes'))
 
 app.get('/', function (req, res) {
   res.json({ description: pjson.description, version: pjson.version })
 })
+
+app.use(logError)
 
 module.exports = app

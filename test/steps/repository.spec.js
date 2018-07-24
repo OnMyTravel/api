@@ -21,7 +21,7 @@ describe('Integration | Step | Repository', () => {
 
   afterEach(() => {
     return Step.remove({}).then(() => {
-      connexion.close()
+      return connexion.close()
     })
   })
 
