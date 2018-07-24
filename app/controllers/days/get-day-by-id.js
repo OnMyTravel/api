@@ -1,16 +1,15 @@
 const DaySerializer = require('../../serializers/DaySerializer')
 const { Day } = require('../../models')
 
-module.exports = (req, res) => {
+module.exports = (req, res, next) => {
   return Day.findById(req.params.day_id)
     .then((day) => {
       if (!day) {
         res.status(404).json()
       } else {
-        res.status(200).json(DaySerializer.serialize(day))
+        const serializedDay = DaySerializer.serialize(day)
+        res.status(200).json(serializedDay)
       }
     })
-    .catch(() => {
-      res.status(500).json()
-    })
+    .catch(next)
 }
