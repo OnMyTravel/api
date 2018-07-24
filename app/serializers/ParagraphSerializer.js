@@ -20,10 +20,9 @@ module.exports = {
       })
   },
 
-  serialize: (day) => {
-    console.log(day)
+  serialize: (paragraph) => {
     return new Serializer(Types.Paragraph, {
       attributes: ['content']
-    }).serialize(day)
+    }).serialize(paragraph)
   }
 }
