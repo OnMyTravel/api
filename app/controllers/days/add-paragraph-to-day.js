@@ -1,7 +1,8 @@
 const ParagraphSerializer = require('../../serializers/ParagraphSerializer')
 const { Day } = require('../../models')
+const { DayNotFound } = require('./../../shared/errors')
 
-module.exports = (req, res) => {
+module.exports = (req, res, next) => {
   let deserializedParagraph
 
   return ParagraphSerializer.deserialize(req.body)
@@ -11,6 +12,10 @@ module.exports = (req, res) => {
       return Day.findById(req.params.day_id)
     })
     .then((day) => {
+      if (!day) {
+        throw new DayNotFound({})
+      }
+
       day.content.push(deserializedParagraph)
       return day.save()
     })
@@ -20,7 +25,12 @@ module.exports = (req, res) => {
     .then((paragraph) => {
       res.status(201).json(paragraph)
     })
-    .catch(() => {
-      res.status(500).json()
+    .catch((err) => {
+      if (err instanceof DayNotFound) {
+        return res.status(404).json()
+      }
+
+      throw err
     })
+    .catch(next)
 }
