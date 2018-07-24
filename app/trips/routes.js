@@ -8,7 +8,6 @@ var controller = require('./controller')
 var isAuthenticated = require('../shared').isAuthenticated
 
 // Routes
-router.get('/:id', controller.getOne)
 router.get('/', isAuthenticated, controller.getAll)
 router.post('/', isAuthenticated, controller.create)
 router.put('/:tripid', isAuthenticated, middleware.existsAndIsEditable, controller.updateOne)

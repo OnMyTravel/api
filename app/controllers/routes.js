@@ -6,10 +6,12 @@ const router = express.Router({ mergeParams: true })
 const {
   createNewDay,
   getDayById,
-  addParagraphToDay
+  addParagraphToDay,
+  getTripById
 } = require('./controllers')
 
 router.get('/days/:day_id', getDayById)
+router.get('/trips/:id', getTripById)
 router.post('/days', createNewDay)
 router.post('/days/:day_id/paragraphs', addParagraphToDay)
 

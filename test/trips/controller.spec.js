@@ -152,37 +152,6 @@ describe('Functional | Trips | controller', function () {
     })
   })
 
-  describe(':getOne', () => {
-    let trip, userId
-    beforeEach(() => {
-      userId = mongoose.Types.ObjectId()
-      return Trip
-        .create({ name: Faker.lorem.sentence(10), owner_id: userId.toString() })
-        .then((createdTrip) => {
-          trip = createdTrip
-        })
-    })
-
-    it('should return 200 when the trip exists', (done) => {
-      chai.request(app)
-        .get('/trips/' + trip._id)
-        .end((e, res) => {
-          res.should.have.status(200)
-          res.body.should.have.property('_id', trip._id.toString())
-          done()
-        })
-    })
-
-    it('should return 404 when the trip does not exist', (done) => {
-      chai.request(app)
-        .get('/trips/' + mongoose.Types.ObjectId())
-        .end((e, res) => {
-          res.should.have.status(404)
-          done()
-        })
-    })
-  })
-
   describe(':updateOne', () => {
     let trip, userId
     beforeEach(() => {
