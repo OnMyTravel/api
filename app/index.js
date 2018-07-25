@@ -6,6 +6,7 @@ const morgan = require('morgan')
 const app = express()
 
 const logError = require('./handlers/logErrors')
+const handleNonExpectedErrors = require('./handlers/handleNonExpectedErrors')
 
 app.use(cors())
 app.use(bodyParser.json())
@@ -26,5 +27,6 @@ app.get('/', function (req, res) {
 })
 
 app.use(logError)
+app.use(handleNonExpectedErrors)
 
 module.exports = app
