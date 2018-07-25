@@ -9,7 +9,7 @@
     "test:watch": "NODE_ENV=test npx mocha --recursive --reporter dot --watch",
     "test:coverage": "npx nyc --reporter html npm test",
     "start": "node index.js",
-    "start:watch": "npx nodemon"
+    "start:watch": "NODE_ENV=development npx nodemon"
   },
   "standard": {
     "globals": [
