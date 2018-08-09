@@ -1,8 +1,7 @@
 /* global describe it */
 const app = require('../../app/index')
 const db = require('../../database')
-const { Trip, Day, Paragraph } = require('../../app/models')
-const Faker = require('faker')
+const { Trip, Day } = require('../../app/models')
 const mongoose = require('mongoose')
 
 const chai = require('chai')
@@ -36,9 +35,13 @@ describe('Functional | Trip | get-trip-details', () => {
       describe('when the trip exists', () => {
         let trip
         let day
+        let userId
         beforeEach(() => {
+
+          userId = mongoose.Types.ObjectId()
+
           return new Trip({
-            owner_id: mongoose.Types.ObjectId(),
+            owner_id: userId,
             name: 'Hello'
           }).save()
             .then((createdTrip) => { trip = createdTrip })
@@ -68,6 +71,9 @@ describe('Functional | Trip | get-trip-details', () => {
                     data: [
                       { type: 'days', id: day.id }
                     ]
+                  },
+                  'user': {
+                    data: { type: 'users', id: userId.toString() }
                   }
                 },
                 'type': 'trips'

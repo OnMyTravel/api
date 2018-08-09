@@ -1,3 +1,4 @@
+const mongoose = require('mongoose')
 const expect = require('chai').expect
 const Faker = require('faker')
 
@@ -10,11 +11,13 @@ describe('Unit | Serializer | Trip', () => {
     it('should transform a Trip object into JSONApi', () => {
       // given
       const description = Faker.lorem.sentence()
+      const destination = Faker.lorem.sentence()
+      const userId = mongoose.Types.ObjectId()
       const name = Faker.lorem.sentence()
       const dayOne = new Day({})
       const dayTwo = new Day({})
       const trip = new Trip({
-        name, description
+        name, description, destination, owner_id: userId
       })
 
       // when
@@ -26,7 +29,7 @@ describe('Unit | Serializer | Trip', () => {
           'type': 'trips',
           'id': `${trip.id}`,
           'attributes': {
-            description, name
+            description, name, destination
           },
           'relationships': {
             'days': {
@@ -34,6 +37,9 @@ describe('Unit | Serializer | Trip', () => {
                 { type: 'days', id: dayOne._id.toString() },
                 { type: 'days', id: dayTwo._id.toString() }
               ]
+            },
+            'user': {
+              'data': { type: 'users', id: userId.toString() }
             }
           }
         }
@@ -44,8 +50,9 @@ describe('Unit | Serializer | Trip', () => {
       // given
       const description = Faker.lorem.sentence()
       const name = Faker.lorem.sentence()
+      const userId = mongoose.Types.ObjectId()
       const trip = new Trip({
-        name, description
+        name, description, owner_id: userId
       })
 
       // when
@@ -62,6 +69,9 @@ describe('Unit | Serializer | Trip', () => {
           'relationships': {
             'days': {
               'data': []
+            },
+            'user': {
+              'data': { type: 'users', id: userId.toString() }
             }
           }
         }

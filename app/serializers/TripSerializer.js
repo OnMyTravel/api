@@ -9,7 +9,7 @@ module.exports = {
     const tripInJson = trip.toJSON()
     tripInJson.days = days
     return new Serializer(Types.Trip, {
-      attributes: ['description', 'name', 'days'],
+      attributes: ['description', 'name', 'days', 'destination', 'user'],
       days: {
         ref: function (trip, day) {
           if (day) {
@@ -17,8 +17,14 @@ module.exports = {
           }
         }
       },
+      user: {
+        ref: function (trip) {
+          return trip.owner_id.toString()
+        }
+      },
       transform: function (trip) {
         trip.id = trip._id.toString()
+        trip.user = trip.owner_id
         return trip
       }
     }).serialize(tripInJson)

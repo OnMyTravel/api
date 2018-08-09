@@ -22,6 +22,8 @@ app.use('/trips/:tripid/steps', require('./steps/routes'))
 app.use('/users', require('./users/routes'))
 app.use('/', require('./controllers/routes'))
 
+app.use(express.static('uploads'))
+
 app.get('/', function (req, res) {
   res.json({ description: pjson.description, version: pjson.version })
 })

@@ -2,18 +2,23 @@
 
 const express = require('express')
 const router = express.Router({ mergeParams: true })
+const upload = require('multer')({ dest: 'uploads/' })
 
 const {
   createNewDay,
   getDayById,
   addParagraphToDay,
-  getTripById
+  getTripById,
+  addImageToDay,
+  getImageById
 } = require('./controllers')
 
 router.get('/days/:day_id', getDayById)
 router.get('/trips/:id', getTripById)
 router.post('/days', createNewDay)
 router.post('/days/:day_id/paragraphs', addParagraphToDay)
+router.post('/days/:day_id/images', upload.single('image'), addImageToDay)
+// router.get('/image/:image_id', getImageById)
 
 // router.get('/', (req, res) => {
 //   console.log('ICI ======================================================================================')

@@ -1,8 +1,11 @@
 /* global describe it */
 const app = require('../../app/index')
 const db = require('../../database')
-const { Day, Paragraph } = require('../../app/models')
+const { Image, Day, Paragraph } = require('../../app/models')
+const Faker = require('faker')
 const mongoose = require('mongoose')
+
+const fs = require('fs')
 
 const chai = require('chai')
 const expect = chai.expect
@@ -10,7 +13,7 @@ const chaiHttp = require('chai-http')
 chai.should()
 chai.use(chaiHttp)
 
-describe('Functional | Day | add-paragraph-to-day', () => {
+describe('Functional | Day | add-image-to-day', () => {
   let dbConnexion
   beforeEach(() => {
     dbConnexion = db.openDatabaseConnexion()
@@ -24,24 +27,9 @@ describe('Functional | Day | add-paragraph-to-day', () => {
     it('should return NOT_FOUND', () => {
       // when
       const request = chai.request(app)
-        .post(`/days/${mongoose.Types.ObjectId()}/paragraphs`)
-        .send({
-          'data': {
-            'type': 'paragraphs',
-            'attributes': {
-              'content': [
-                'Nouveau paragraphe'
-              ]
-            },
-            'relationships': {
-              'day': {
-                'data': {
-                  'type': 'days', 'id': '165'
-                }
-              }
-            }
-          }
-        })
+        .post(`/days/${mongoose.Types.ObjectId()}/images`)
+        .type('form')
+        .attach('image', fs.readFileSync('./test/days/starWithGPS.jpg'), 'avatar.png')
 
       // then
       return request.then((res) => {
@@ -63,20 +51,46 @@ describe('Functional | Day | add-paragraph-to-day', () => {
         })
     })
 
-    afterEach(() => {
-      return Day.deleteMany()
-    })
+    // afterEach(() => {
+    //   return Day.deleteMany()
+    // })
 
     it('should register the day', () => {
       // when
       const request = chai.request(app)
-        .post(`/days/${day._id}/paragraphs`)
-        .send(payload)
+        .post(`/days/${day._id}/images`)
+        .type('form')
+        .attach('image', fs.readFileSync('./test/days/starWithGPS.jpg'), 'avatar.png')
+        .field('caption', 'My super caption')
+        .field('GPSLatitude', '42.486186')
+        .field('GPSLongitudeRef', 'N')
+        .field('GPSLatitudeRef', 'E')
+        .field('GPSLongitude', '42.486186')
+        .field('GPSAltitudeRef', '87.154816')
+        .field('GPSAltitude', '42.153186015')
 
       // then
-      return request.then((res) => {
-        res.should.have.status(201)
-      })
+      return request
+        .then((res) => {
+          res.should.have.status(201)
+        })
+        .then(() => Day.findById(day._id))
+        .then((day) => {
+          expect(day.content).to.have.a.lengthOf(1)
+          expect(day.content[0]).to.include({
+            'type': 'image',
+            caption: 'My super caption',
+          })
+          expect(day.content[0].gps).to.include({
+            'GPSLatitudeRef': 'E',
+            'GPSLatitude': 42.486186,
+            'GPSLongitudeRef': 'N',
+            'GPSLongitude': 42.486186,
+            'GPSAltitudeRef': 87.154816,
+            'GPSAltitude': 42.153186015
+          })
+          expect(day.content[0].path).to.match(/[a-zA-Z0-9]+\.png/)
+        })
     })
 
     it('should append the paragraph to the day', () => {
