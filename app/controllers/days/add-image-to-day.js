@@ -14,6 +14,10 @@ module.exports = (req, res, next) => {
       return day
     })
     .then((day) => {
+
+      if(!req.file)
+        return res.status(400).json()
+
       day.content.push(new Image({
         caption: req.body.caption,
         path: `${req.file.filename}.${mime.extension(req.file.mimetype)}`,

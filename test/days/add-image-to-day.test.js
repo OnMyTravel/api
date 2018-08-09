@@ -51,9 +51,9 @@ describe('Functional | Day | add-image-to-day', () => {
         })
     })
 
-    // afterEach(() => {
-    //   return Day.deleteMany()
-    // })
+    afterEach(() => {
+      return Day.deleteMany()
+    })
 
     it('should register the day', () => {
       // when
@@ -90,6 +90,26 @@ describe('Functional | Day | add-image-to-day', () => {
             'GPSAltitude': 42.153186015
           })
           expect(day.content[0].path).to.match(/[a-zA-Z0-9]+\.png/)
+        })
+    })
+
+    it('should register the day', () => {
+      // when
+      const request = chai.request(app)
+        .post(`/days/${day._id}/images`)
+        .type('form')
+        .field('caption', 'My super caption')
+        .field('GPSLatitude', '42.486186')
+        .field('GPSLongitudeRef', 'N')
+        .field('GPSLatitudeRef', 'E')
+        .field('GPSLongitude', '42.486186')
+        .field('GPSAltitudeRef', '87.154816')
+        .field('GPSAltitude', '42.153186015')
+
+      // then
+      return request
+        .then((res) => {
+          res.should.have.status(400)
         })
     })
 
