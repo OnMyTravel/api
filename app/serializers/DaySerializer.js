@@ -30,7 +30,7 @@ module.exports = {
         ref: function (day, content) {
           return content._id.toString()
         },
-        attributes: ['content', 'caption']
+        attributes: ['content', 'caption', 'path', 'gps']
       }
     }).serialize(day)
   }
