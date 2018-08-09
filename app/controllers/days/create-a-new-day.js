@@ -12,7 +12,7 @@ module.exports = (req, res) => {
     })
     .then((trip) => {
       if (!trip) {
-        throw new TripNotFound()
+        return Promise.reject(new TripNotFound())
       }
 
       return day.save()
@@ -26,7 +26,7 @@ module.exports = (req, res) => {
         return res.status(404).json()
       }
 
-      console.error(err)
+      console.log(err)
       return res.status(500).json(err)
     })
 }
