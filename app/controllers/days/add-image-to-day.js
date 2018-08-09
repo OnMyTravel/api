@@ -1,7 +1,6 @@
 const { Day, Image } = require('../../models')
 const { DayNotFound } = require('./../../shared/errors')
 
-const mime = require('mime-types')
 const _ = require('lodash')
 
 module.exports = (req, res, next) => {
@@ -19,7 +18,7 @@ module.exports = (req, res, next) => {
 
       day.content.push(new Image({
         caption: req.body.caption,
-        path: `${req.file.filename}.${mime.extension(req.file.mimetype)}`,
+        path: `${req.file.filename}`,
         gps: _.omit(req.body, 'caption')
       }))
 
