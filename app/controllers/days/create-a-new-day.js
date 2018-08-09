@@ -15,6 +15,7 @@ module.exports = (req, res) => {
         return Promise.reject(new TripNotFound())
       }
 
+      console.log(day)
       return day.save()
     })
     .then((savedDay) => {
