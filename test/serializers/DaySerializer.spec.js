@@ -40,7 +40,9 @@ describe('Unit | Serializer | Day', () => {
     it('should transform a compound Day object into JSONApi', () => {
       // Given
       const includedParagraph = new Paragraph({}).toJSON()
-      const includedImage = new Image({ caption: 'Image underlying message' }).toJSON()
+      const includedImage = new Image({
+        caption: 'Image underlying message'
+      }).toJSON()
       const day = new Day({
         content: [includedParagraph, includedImage]
       })
