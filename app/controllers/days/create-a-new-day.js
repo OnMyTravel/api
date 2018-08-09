@@ -15,6 +15,8 @@ module.exports = (req, res) => {
         throw new TripNotFound()
       }
 
+      console.log('SAVING DAY')
+      console.log(day.save)
       return day.save()
     })
     .then((savedDay) => {
@@ -26,6 +28,7 @@ module.exports = (req, res) => {
         return res.status(404).json()
       }
 
-      throw err
+      console.error(err)
+      return res.status(500).json(err)
     })
 }
