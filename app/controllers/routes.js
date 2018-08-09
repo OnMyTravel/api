@@ -1,8 +1,23 @@
 'use strict'
 
+const crypto = require('crypto')
+const mime = require('mime-types')
+
+const multer = require('multer')
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, './uploads/')
+  },
+  filename: function (req, file, cb) {
+    crypto.pseudoRandomBytes(16, function (_, raw) {
+      cb(null, raw.toString('hex') + Date.now() + '.' + mime.extension(file.mimetype));
+    })
+  }
+})
+
 const express = require('express')
 const router = express.Router({ mergeParams: true })
-const upload = require('multer')({ dest: 'uploads/' })
+const upload = multer({ storage })
 
 const {
   createNewDay,
