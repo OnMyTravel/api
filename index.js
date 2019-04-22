@@ -8,6 +8,7 @@ const db = openDatabaseConnexion()
 // Once the connexion is failed
 db.on('error', (err) => {
   console.error(err)
+  // TODO Should log the properly
 })
 
 // Once the connexion is opened
