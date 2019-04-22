@@ -26,13 +26,13 @@ services:
   api:
     build: .
     container_name: api
+    command: nodemon server.js
     ports:
       - 3001:3001
     volumes:
       - .:/src/app
     environment:
       NODE_ENV: development
-      WAIT_HOSTS: mongo-db:27017
     depends_on:
       - db
     networks:
