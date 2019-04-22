@@ -3,7 +3,7 @@
     "port": 3001
   },
   "database": {
-      "host": "mongodb://localhost:27017/onmytravel-dev"
+    "host": "mongodb://mongo-db:27017/onmytravel-dev"
   },
   "app-secret": "supersecret",
   "storage": {
