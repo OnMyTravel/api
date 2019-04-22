@@ -7,7 +7,7 @@
     "test": "NODE_ENV=test npx mocha --recursive --reporter dot",
     "test:full": "NODE_ENV=test npx mocha --recursive",
     "test:watch": "NODE_ENV=test npx mocha --recursive --reporter dot --watch",
-    "test:coverage": "npx nyc --reporter html npm test",
+    "test:coverage": "npx nyc --reporter text --reporter text-summary npm test",
     "start": "node index.js",
     "start:watch": "NODE_ENV=development npx nodemon"
   },
