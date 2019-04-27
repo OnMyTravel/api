@@ -1,5 +1,10 @@
 language: node_js
 node_js:
-  - "10.3.0"
+- 10.3.0
 services:
-  - mongodb
+- mongodb
+deploy:
+  provider: scalingo
+  app: onmytravel
+  api_key:
+    secure: JPsSDeA2e9bvorVEbopc9Lw6+qDXmzoA/3n5Dj0KYzamE6ogSy+0uXhLXg7PmGVy+s2uo6Ne9/g7s+fSXn1E2b3cBuX7yUti6vmYRSeGwNMMM8Ee605WW2x07IbeZypVkXwjV3qTyEopqK31Rg+mFvcS6sXjiofDetGQow1gDFFBiyqHchxQft3LXlOqNTJMN08QClh93dhU2fs1HDRBIFW5VrhTBZcn6pB4C5es2flAPJa44Te/s9J//x+HpRt+RbklRJj+IDEyCozRkMY3GzZIEaV1vNHH2krA232giGXmYUTc/Xmfyako9odMHcfUjZQGW7vIaAdH8Xu0+lA1vomqlkO9xVkTRKNGiUH6UQ8Qr/Q98LLU9PwHQ54yHRigptdVe1Qn3qMxx8nsVReGNvAqMCvynnUEYVV/hy5K1KkkLzzhEtPD997R8X2s6/vZ9lvfpQ/G5dLzR7RY8Gbc7QeZUSq3M2U+17armBTbfN0wOohkMlQgbfpdbBjkTVk8zRVbsJFLo0ysJm5b2+H9DGhymbvSEXhpS7oLBUaXbVxgE8D5NmrNgRbsKFQ5IcM7ojgl2Y1re3f+O5Es3aRPERNdKrv14F06NizhOJfBm3X7AidRuhh7PF1aMMnkX3zbytUOwaZreELgCxUhC7Gr1bQwLkv9dvMyT6wy3W4lJtU=
