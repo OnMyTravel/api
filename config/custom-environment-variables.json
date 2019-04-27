@@ -1,4 +1,7 @@
 {
+    "app": {
+        "port": "PORT"
+    },
     "database": {
         "host": "MONGO_URL"
     }
