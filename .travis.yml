@@ -3,6 +3,8 @@ node_js:
 - 10.3.0
 services:
 - mongodb
+install:
+  - git fetch --unshallow
 deploy:
   debug: true
   provider: scalingo
