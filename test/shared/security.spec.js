@@ -103,8 +103,8 @@ describe('Shared', () => {
 
           // Then
           next.should.not.have.been.called
-          let headers = response._getHeaders()
-          headers.should.have.a.property('WWW-Authenticate')
+          const headers = response._getHeaders()
+          headers.should.have.a.property('www-authenticate')
         })
       })
     })
