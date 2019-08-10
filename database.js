@@ -14,6 +14,7 @@ const options = {
 module.exports = {
   openDatabaseConnexion: () => {
     mongoose.connect(config.database.host, options)
+    mongoose.set('useFindAndModify', false);
 
     return mongoose.connection
   }

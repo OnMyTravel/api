@@ -25,7 +25,7 @@ function updateByTripIdAndStepId (stepId, model) {
 }
 
 function deleteByTripId (tripId) {
-  return Step.remove({ trip_id: tripId })
+  return Step.deleteMany({ trip_id: tripId })
 }
 
 function addImageToGallery (stepId, imageModel) {

@@ -13,7 +13,7 @@ function create (model) {
 }
 
 function updateByIdAndOwnerId (_id, ownerId, model) {
-  return Trip.update({ _id, owner_id: ownerId }, { $set: model }, {runValidators: true})
+  return Trip.updateOne({ _id, owner_id: ownerId }, { $set: model }, {runValidators: true})
 }
 
 function deleteById (_id) {

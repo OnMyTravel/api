@@ -28,7 +28,7 @@ describe('Integration | Trip | Middleware', () => {
   })
 
   afterEach(() => {
-    return Trip.remove({}).then(() => {
+    return Trip.deleteMany({}).then(() => {
       return connexion.close()
     })
   })
