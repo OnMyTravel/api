@@ -20,7 +20,7 @@ describe('Integration | Step | Repository', () => {
   })
 
   afterEach(() => {
-    return Step.remove({}).then(() => {
+    return Step.deleteMany({}).then(() => {
       return connexion.close()
     })
   })
@@ -78,7 +78,7 @@ describe('Integration | Step | Repository', () => {
     })
 
     afterEach(() => {
-      return Step.remove({})
+      return Step.deleteMany({})
     })
 
     it('checks sanity', () => {
@@ -112,7 +112,7 @@ describe('Integration | Step | Repository', () => {
     })
 
     afterEach(() => {
-      return Step.remove({})
+      return Step.deleteMany({})
     })
 
     it('checks sanity', () => {
@@ -140,7 +140,7 @@ describe('Integration | Step | Repository', () => {
     })
 
     afterEach(() => {
-      return Step.remove({})
+      return Step.deleteMany({})
     })
 
     it('checks sanity', () => {
@@ -148,7 +148,7 @@ describe('Integration | Step | Repository', () => {
       repository.deleteById.should.be.a('function')
     })
 
-    it('should remove the selected step', () => {
+    it('should deleteMany the selected step', () => {
       const promise = repository
         .deleteById(step._id)
         .then(() => {
@@ -173,7 +173,7 @@ describe('Integration | Step | Repository', () => {
     })
 
     afterEach(() => {
-      return Step.remove({})
+      return Step.deleteMany({})
     })
 
     it('checks sanity', () => {
@@ -219,23 +219,19 @@ describe('Integration | Step | Repository', () => {
 
   describe(':deleteByTripId', () => {
     let targetedTrip
-    beforeEach((done) => {
+    beforeEach(() => {
       targetedTrip = Mongoose.Types.ObjectId()
       let otherTrip = Mongoose.Types.ObjectId()
-      Step
-        .create([
+      return Step.create([
           { message: 'TRIP ONE - FIRST STEP', trip_id: targetedTrip },
           { message: 'TRIP ONE - SECOND STEP', trip_id: targetedTrip },
           { message: 'TRIP TWO', trip_id: otherTrip },
           { message: 'TRIP ONE - THIRD STEP', trip_id: targetedTrip }
         ])
-        .then(() => {
-          done()
-        })
     })
 
     afterEach(() => {
-      Step.remove({}).exec()
+      Step.deleteMany({}).exec()
     })
 
     it('checks sanity', () => {
@@ -243,18 +239,13 @@ describe('Integration | Step | Repository', () => {
       repository.deleteByTripId.should.be.a('function')
     })
 
-    it('should remove the selected step', (done) => {
-      repository
+    it('should deleteMany the selected step', () => {
+      return repository
         .deleteByTripId(targetedTrip)
-        .then(() => {
-          Step
-            .find({})
-            .then((steps) => {
-              steps.should.have.length(1)
-              steps[0].message.should.equal('TRIP TWO')
-
-              done()
-            })
+        .then(() => Step.find({}))
+        .then((steps) => {
+          steps.should.have.length(1)
+          steps[0].message.should.equal('TRIP TWO')
         })
     })
   })
@@ -273,7 +264,7 @@ describe('Integration | Step | Repository', () => {
     })
 
     afterEach(() => {
-      return Step.remove({})
+      return Step.deleteMany({})
     })
 
     it('checks sanity', () => {
@@ -351,7 +342,7 @@ describe('Integration | Step | Repository', () => {
     })
 
     afterEach(() => {
-      return Step.remove({})
+      return Step.deleteMany({})
     })
 
     it('checks sanity', () => {

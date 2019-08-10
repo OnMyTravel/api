@@ -28,7 +28,7 @@ describe('Functionnal | Users', () => {
   })
 
   afterEach(() => {
-    return User.remove({})
+    return User.deleteMany({})
   })
 
   describe('/users/register/facebook', () => {
@@ -85,7 +85,7 @@ describe('Functionnal | Users', () => {
       })
 
       afterEach(() => {
-        return User.remove({})
+        return User.deleteMany({})
       })
 
       it('should return an encrypted token', (done) => {
@@ -110,7 +110,7 @@ describe('Functionnal | Users', () => {
       })
 
       afterEach(() => {
-        User.remove({ id_facebook: '1234567891' }).exec()
+        User.deleteMany({ id_facebook: '1234567891' }).exec()
       })
 
       it('should return CREATED', (done) => {

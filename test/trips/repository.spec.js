@@ -19,7 +19,7 @@ describe('Integation | Trip | Repository', () => {
   })
 
   afterEach(() => {
-    return Trip.remove({})
+    return Trip.deleteMany({})
   })
 
   describe(':findById', () => {
