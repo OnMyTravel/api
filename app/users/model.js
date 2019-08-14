@@ -8,6 +8,9 @@ let UserSchema = new Schema(
       type: String,
       required: false
     },
+    password: {
+      type: String
+    },
     id_facebook: {
       type: String
     }

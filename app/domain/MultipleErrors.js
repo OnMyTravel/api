@@ -13,6 +13,10 @@ class MultipleErrors extends DomainError {
     getErrors() {
         return this.errors;
     }
+
+    hasErrors() {
+        return this.errors.length > 0
+    }
 }
 
 module.exports = MultipleErrors;

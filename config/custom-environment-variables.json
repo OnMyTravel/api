@@ -1,6 +1,7 @@
 {
     "app": {
-        "port": "PORT"
+        "port": "PORT",
+        "passwordSecret": "PASSWORD_SECRET"
     },
     "database": {
         "host": "MONGO_URL"
