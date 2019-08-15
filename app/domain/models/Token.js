@@ -6,7 +6,11 @@ let TokenSchema = new Schema(
     userId: { type: Schema.Types.ObjectId, required: true },
     key: String,
     creationDate: Date,
-    expirationDate: Date
+    expirationDate: Date,
+    isExpired: {
+      type: Schema.Types.Boolean,
+      default: false
+    }
   },
   {
     versionKey: false
