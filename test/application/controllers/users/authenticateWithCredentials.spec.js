@@ -4,12 +4,8 @@ const expect = require('chai').expect
 const users = require('../../../../app/application/controllers/users')
 const useCases = require('../../../../app/domain/use-cases')
 
-const mockResponse = () => {
-    const res = {};
-    res.status = sinon.stub().returns(res);
-    res.json = sinon.stub().returns(res);
-    return res;
-};
+const { mockResponseObject } = require('../../../middleware.helper')
+const { cleanDatabase } = require('../../../database.helper')
 
 describe('Unit | Controllers | User | authenticateWithCredentials', () => {
     let sandbox
@@ -24,7 +20,7 @@ describe('Unit | Controllers | User | authenticateWithCredentials', () => {
 
     it('should start authentication with credentials', () => {
         // Given
-        const response = mockResponse()
+        const response = mockResponseObject()
         const requestBody = {
             body: {}
         };
@@ -38,7 +34,7 @@ describe('Unit | Controllers | User | authenticateWithCredentials', () => {
 
     it('should format the password', () => {
         // Given
-        const response = mockResponse()
+        const response = mockResponseObject()
         const requestBody = {
             body: {
                 email: 'email@example.net',

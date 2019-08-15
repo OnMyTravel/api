@@ -8,17 +8,20 @@ chai.should()
 chai.use(chaiHttp)
 
 const encryptionService = require('../../app/application/services/passwordEncryption')
+const { cleanDatabase } = require('../database.helper')
 
 const User = require(require('config').get('app-folder') + '/users/model')
 
 describe('Functionnal | Account | Authenticate a user using credentials', () => {
   let connexion
-  before(() => {
+  beforeEach(() => {
     connexion = db.openDatabaseConnexion()
   })
 
-  after(() => {
-    return connexion.close()
+  afterEach(() => {
+    return cleanDatabase().then(() => {
+      return connexion.close()
+    })
   })
 
   describe('when some credentials are missing', () => {
