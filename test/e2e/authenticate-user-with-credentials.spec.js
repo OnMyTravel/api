@@ -139,5 +139,21 @@ describe('Functionnal | Account | Authenticate a user using credentials', () =>
           expect(response.body).to.have.property('token')
         })
     })
+
+    it('should set a secured cookie with token', () => {
+      return chai.request(app)
+        .post('/users/register/webapp')
+        .send({
+          email,
+          password
+        })
+        .then((response) => {
+          expect(response).to.have.property('header')
+            .that.have.property('set-cookie')
+            .that.match(/token=/)
+            .and.that.match(/Secure/)
+            .and.that.match(/Path=\//)
+        })
+    })
   })
 })

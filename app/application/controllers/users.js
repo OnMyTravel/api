@@ -16,7 +16,7 @@ module.exports = {
             payload: payload
         }, { tokenRepository, userRepository })
         .then((token) => {
-            res.status(201).json(token)
+            res.cookie('token', token, { secure: true }).status(201).json(token)
         })
         .catch(next)
     }
