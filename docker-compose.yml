@@ -33,6 +33,7 @@ services:
       - .:/src/app
     environment:
       NODE_ENV: development
+      PASSWORD_SECRET: my-nice-password
     depends_on:
       - db
     networks:

@@ -6,6 +6,7 @@ const morgan = require('morgan')
 const app = express()
 
 const logError = require('./handlers/logErrors')
+const handleDomainErrors = require('./application/handleDomainErrors')
 const handleNonExpectedErrors = require('./handlers/handleNonExpectedErrors')
 
 app.use(cors())
@@ -28,6 +29,7 @@ app.get('/', function (req, res) {
   res.json({ description: pjson.description, version: pjson.version })
 })
 
+app.use(handleDomainErrors)
 app.use(logError)
 app.use(handleNonExpectedErrors)
 
