@@ -44,7 +44,7 @@
     "express": "^4.16.4",
     "http-status-codes": "^1.0.6",
     "jsonapi-serializer": "^3.5.6",
-    "jsonwebtoken": "^8.3.0",
+    "jsonwebtoken": "^9.0.0",
     "mime-types": "^2.1.19",
     "mongoose": "^5.6.9",
     "morgan": "^1.9.1",
